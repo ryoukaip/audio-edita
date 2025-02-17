@@ -7,7 +7,4 @@ class SeparatePage(QWidget):
     
     def initUI(self):
         layout = QVBoxLayout()
-        title = QLabel("Separate Audio")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
-        layout.addWidget(title)
         self.setLayout(layout)

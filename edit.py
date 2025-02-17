@@ -5,8 +5,8 @@ from PyQt5.QtCore import Qt
 class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(110, 80)  # Đảm bảo nút có kích thước tối thiểu nhưng vẫn co giãn
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Nút mở rộng theo layout
+        self.setFixedSize(110, 80)  # Đặt kích thước tối đa cố định
 
         # Load font Cabin-Bold
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")

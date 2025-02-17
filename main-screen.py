@@ -9,6 +9,7 @@ from check import CheckPage
 class AudioEditorUI(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.current_button = None  # Biến lưu trạng thái nút đang chọn
         self.initUI()
 
     def initUI(self):
@@ -110,14 +111,12 @@ class AudioEditorUI(QMainWindow):
                     padding: 12px 16px;
                     text-align: left;
                 }
-                QPushButton:hover {
-                    background-color: #7d8bd4;
-                }
             """)
             btn.setFont(QFont(font_family, 12))
             btn.setFixedHeight(50)
             btn.setIconSize(QSize(24, 24))
-            btn.clicked.connect(lambda checked, i=index: self.stack.setCurrentIndex(i))
+            btn.clicked.connect(
+                lambda checked, i=index, b=btn: (self.stack.setCurrentIndex(i), self.set_active_button(b)))
             sidebar.addWidget(btn)
 
         sidebar.addStretch()
@@ -132,7 +131,36 @@ class AudioEditorUI(QMainWindow):
         main_layout.addWidget(self.title_bar)
         main_layout.addLayout(content_layout)
 
+        # Mặc định nút Edit được chọn
+        self.set_active_button(self.edit_btn) 
         self.is_maximized = False
+
+    def set_active_button(self, button):
+        if self.current_button:  
+            self.current_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #1c1b1f;
+                    color: white;
+                    font-size: 14px;
+                    border: none;
+                    border-radius: 14px;
+                    padding: 12px 16px;
+                    text-align: left;
+                }
+            """)  # Reset màu nút cũ
+
+        button.setStyleSheet("""
+            QPushButton {
+                background-color: #474f7a;  /* Màu nút đang chọn */
+                color: white;
+                font-size: 14px;
+                border: none;
+                border-radius: 14px;
+                padding: 12px 16px;
+                text-align: left;
+            }
+        """)  
+        self.current_button = button  # Cập nhật nút hiện tại
 
     def toggleMaximize(self):
         if self.is_maximized:
