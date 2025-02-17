@@ -1,36 +1,54 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGridLayout, QHBoxLayout
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGridLayout, QSizePolicy
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 from PyQt5.QtCore import Qt
 
-class IconButton(QWidget):
+class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
-        self.setFixedSize(100, 120)  # Đảm bảo kích thước phù hợp
+        self.setMinimumSize(110, 80)  # Đảm bảo nút có kích thước tối thiểu nhưng vẫn co giãn
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Nút mở rộng theo layout
+
+        # Load font Cabin-Bold
+        font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        self.setFont(QFont(font_family, 11))  # Áp dụng font cho nút
+
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: #323754;
+                border-radius: 15px;
+                border: none;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: #7d8bd4;
+            }
+            QPushButton:pressed {
+                background-color: #292d47;
+            }
+        """)
 
         layout = QVBoxLayout(self)
         layout.setSpacing(5)
+        layout.setContentsMargins(5, 5, 5, 5)
         layout.setAlignment(Qt.AlignCenter)
 
-        # QLabel để hiển thị icon
         icon_label = QLabel(self)
-        pixmap = QPixmap(icon_path).scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap = QPixmap(icon_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         icon_label.setPixmap(pixmap)
         icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setStyleSheet("background: transparent;")
 
-        # QLabel để hiển thị chữ
         text_label = QLabel(text, self)
-        text_label.setFont(QFont("Arial", 11))
+        text_label.setFont(QFont(font_family, 11))
         text_label.setAlignment(Qt.AlignCenter)
-        text_label.setStyleSheet("color: white;")
+        text_label.setStyleSheet("color: white; background: transparent;")
 
         layout.addWidget(icon_label)
         layout.addWidget(text_label)
 
         self.setLayout(layout)
-        self.setStyleSheet("""
-            background-color: #323754;
-            border-radius: 10px;
-        """)
+
 
 class EditPage(QWidget):
     def __init__(self):
@@ -38,39 +56,52 @@ class EditPage(QWidget):
         self.initUI()
     
     def initUI(self):
+        #Thêm font cho ứng dụng
+        font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        self.setFont(QFont(font_family))
+
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(12, 50, 12, 12)
+        layout.setSpacing(15)
         
         title = QLabel("audio editing")
-        title.setFont(QFont("Arial", 16))
+        title.setFont(QFont(font_family, 16))
         title.setAlignment(Qt.AlignCenter)
         subtitle = QLabel("choose a function to start")
-        subtitle.setFont(QFont("Arial", 12))
+        subtitle.setFont(QFont(font_family, 12))
         subtitle.setAlignment(Qt.AlignCenter)
         
         title_subtitle_layout = QVBoxLayout()
         title_subtitle_layout.addWidget(title)
         title_subtitle_layout.addWidget(subtitle)
-        title_subtitle_layout.setSpacing(10)
+        title_subtitle_layout.setSpacing(2)
         title_subtitle_layout.setAlignment(Qt.AlignCenter)
         
         # Grid Layout cho các nút
         grid = QGridLayout()
-        grid.setContentsMargins(10, 10, 10, 10)
-        grid.setSpacing(5)
+        grid.setContentsMargins(20, 20, 20, 20)
+        grid.setSpacing(15)
 
         buttons = [
             ("mixing", "./icon/mix.png"), ("trim", "./icon/trim.png"), 
             ("merge", "./icon/merge.png"), ("split", "./icon/split.png"),
             ("volume", "./icon/volume.png"), ("reverse", "./icon/reverse.png"), 
             ("speed", "./icon/speed.png"), ("compress", "./icon/compress.png"),
-            ("convert", "./icon/convert.png"), ("voice changer", "./icon/voice.png")
+            ("convert", "./icon/convert.png"), ("voice", "./icon/voice.png")
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
-            btn = IconButton(icon_path, text)  # Sử dụng widget nút tùy chỉnh
+            btn = IconButton(icon_path, text)
             grid.addWidget(btn, *pos)
         
+        # Đảm bảo lưới co giãn theo kích thước cửa sổ
+        for i in range(2):
+            grid.setRowStretch(i, 1)
+        for j in range(5):
+            grid.setColumnStretch(j, 1)
+
         layout.addLayout(title_subtitle_layout)
         layout.addLayout(grid)
+        layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ

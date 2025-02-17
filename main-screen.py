@@ -111,7 +111,7 @@ class AudioEditorUI(QMainWindow):
                     text-align: left;
                 }
                 QPushButton:hover {
-                    background-color: #474f7a;
+                    background-color: #7d8bd4;
                 }
             """)
             btn.setFont(QFont(font_family, 12))
