@@ -78,12 +78,13 @@ class CheckPage(QWidget):
         title_subtitle_layout.setAlignment(Qt.AlignCenter)
         
         # Grid Layout cho các nút
-        grid = QGridLayout()
+        container = QWidget()
+        grid = QGridLayout(container)
         grid.setContentsMargins(20, 20, 20, 20)
         grid.setSpacing(15)
 
         buttons = [
-            ("online", "./icon/wifi.png"), ("offline", "./icon/wifi-none.png")
+            ("online", "./icon/wifi.png"), ("offline", "./icon/wifi-none.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
@@ -91,13 +92,9 @@ class CheckPage(QWidget):
             btn = IconButton(icon_path, text)
             grid.addWidget(btn, *pos)
         
-        # Đảm bảo lưới co giãn theo kích thước cửa sổ
-        for i in range(2):
-            grid.setRowStretch(i, 1)
-        for j in range(5):
-            grid.setColumnStretch(j, 1)
+        container.setFixedWidth(300)
 
         layout.addLayout(title_subtitle_layout)
-        layout.addLayout(grid)
+        layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 

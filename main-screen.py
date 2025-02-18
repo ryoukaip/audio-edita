@@ -83,6 +83,7 @@ class AudioEditorUI(QMainWindow):
         # Nội dung chính
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout = content_layout # Lưu lại layout để sử dụng trong resizeEvent
 
         sidebar = QVBoxLayout()
         sidebar.setSpacing(10)
@@ -135,6 +136,17 @@ class AudioEditorUI(QMainWindow):
         self.set_active_button(self.edit_btn) 
         self.is_maximized = False
 
+    def resizeEvent(self, event):
+        # Kiểm tra nếu cửa sổ đang ở chế độ toàn màn hình
+        if self.isMaximized():  
+            self.content_layout.setStretch(0, 1)  
+            self.content_layout.setStretch(1, 8)  
+        else:
+            self.content_layout.setStretch(0, 1) 
+            self.content_layout.setStretch(1, 4)  
+        super().resizeEvent(event)
+
+
     def set_active_button(self, button):
         if self.current_button:  
             self.current_button.setStyleSheet("""
@@ -171,22 +183,21 @@ class AudioEditorUI(QMainWindow):
             self.is_maximized = True
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            if self.title_bar.geometry().contains(event.pos()):
-                if self.is_maximized:
-                    self.showNormal()
-                    self.is_maximized = False
-                    self.move(event.globalPos().x() - self.width() // 2, event.globalPos().y() - 10)
+        if event.button() == Qt.LeftButton and self.title_bar.geometry().contains(event.pos()):
+            if not self.is_maximized:  # Chỉ cho phép kéo khi không full screen
                 self.dragging = True
                 self.drag_pos = event.globalPos() - self.pos()
                 event.accept()
             else:
-                self.dragging = False
+                self.dragging = False  # Khi đang full screen, không làm gì cả
+
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton and getattr(self, "dragging", False):
-            self.move(event.globalPos() - self.drag_pos)
-            event.accept()
+            if not self.is_maximized:  # Chỉ di chuyển khi không full screen
+                self.move(event.globalPos() - self.drag_pos)
+                event.accept()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

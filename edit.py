@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt
 class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Nút mở rộng theo layout
         self.setFixedSize(110, 80)  # Đặt kích thước tối đa cố định
 
         # Load font Cabin-Bold
@@ -79,7 +78,8 @@ class EditPage(QWidget):
         title_subtitle_layout.setAlignment(Qt.AlignCenter)
         
         # Grid Layout cho các nút
-        grid = QGridLayout()
+        container = QWidget()
+        grid = QGridLayout(container)
         grid.setContentsMargins(20, 20, 20, 20)
         grid.setSpacing(15)
 
@@ -95,13 +95,9 @@ class EditPage(QWidget):
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
             grid.addWidget(btn, *pos)
-        
-        # Đảm bảo lưới co giãn theo kích thước cửa sổ
-        for i in range(2):
-            grid.setRowStretch(i, 1)
-        for j in range(5):
-            grid.setColumnStretch(j, 1)
 
+        container.setFixedWidth(650)
+      
         layout.addLayout(title_subtitle_layout)
-        layout.addLayout(grid)
+        layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
