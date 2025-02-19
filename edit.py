@@ -20,10 +20,10 @@ class IconButton(QPushButton):
                 padding: 5px;
             }
             QPushButton:hover {
-                background-color: #7d8bd4;
+                background-color: #292d47;
             }
             QPushButton:pressed {
-                background-color: #292d47;
+                background-color: #7d8bd4;
             }
         """)
 

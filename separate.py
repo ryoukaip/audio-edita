@@ -1,12 +1,13 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontDatabase
-
+from function.function_playaudio import DropAreaLabel
 
 class SeparatePage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.selected_file = None
     
     def initUI(self):
         # Create main widget to hold everything
@@ -22,19 +23,8 @@ class SeparatePage(QWidget):
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
 
-        drop_area = QLabel("select file or drop here")
-        drop_area.setFixedHeight(200) 
-        drop_area.setFont(QFont(font_family, 14))
-        drop_area.setStyleSheet("""
-            QLabel {
-                background-color: #7d8bd4;
-                border: 3px solid #FBFFE4;
-                border-radius: 25px;
-                color: white;
-                font-size: 16px;
-            }
-        """)
-        drop_area.setAlignment(Qt.AlignCenter)
+        self.drop_area = DropAreaLabel()
+        self.drop_area.file_dropped.connect(self.handle_file_dropped)
 
         # Create options layout
         options_layout = QHBoxLayout()  # Change to horizontal to create two columns
@@ -62,7 +52,7 @@ class SeparatePage(QWidget):
         
         for text, number in options:
             option_row = QHBoxLayout()
-            option_row.setSpacing(20)
+            option_row.setSpacing(15)
             
             # Create number button
             btn = QPushButton(number)
@@ -130,14 +120,14 @@ class SeparatePage(QWidget):
         options_layout.addLayout(left_column)
         options_layout.addLayout(right_column)
         
-        content_layout.addWidget(drop_area)
+        content_layout.addWidget(self.drop_area)
         content_layout.addSpacing(20)
         content_layout.addLayout(options_layout)
         
         # Create export button
         export_btn = QPushButton("Export")
-        export_btn.setFixedSize(120, 45)
-        export_btn.setFont(QFont(font_family, 14))
+        export_btn.setFixedSize(100, 40)
+        export_btn.setFont(QFont(font_family, 13))
         export_btn.setStyleSheet("""
             QPushButton {
                 background-color: #474f7a;
@@ -158,3 +148,8 @@ class SeparatePage(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(main_widget)
         self.setLayout(layout)
+
+    def handle_file_dropped(self, file_path):
+        self.selected_file = file_path
+        # Here you can add additional logic to handle the selected file
+        print(f"Selected audio file: {file_path}")
