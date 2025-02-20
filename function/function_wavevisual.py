@@ -1,0 +1,72 @@
+import librosa
+import numpy as np
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QPainter, QColor, QPen
+from PyQt5.QtCore import Qt, QRect
+
+class WaveformWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.waveform_data = None
+        self.progress = 0
+        self.setMinimumHeight(190)
+        
+    def load_audio(self, file_path):
+        try:
+            # Load audio với sr thấp hơn để giảm dữ liệu
+            audio, sr = librosa.load(file_path, sr=22050, mono=True)
+            
+            # Giảm số lượng mẫu bằng cách lấy trung bình
+            target_samples = 1000  # Số lượng mẫu mong muốn
+            samples_per_pixel = len(audio) // target_samples
+            
+            if samples_per_pixel > 1:
+                self.waveform_data = np.array_split(audio, target_samples)
+                self.waveform_data = [np.mean(np.abs(chunk)) for chunk in self.waveform_data]
+            else:
+                self.waveform_data = audio
+                
+            self.update()
+        except Exception as e:
+            print(f"Error loading audio: {e}")
+            self.waveform_data = None
+
+    def set_progress(self, progress):
+        """Set playback progress (0-100)"""
+        self.progress = progress
+        self.update()
+
+    def paintEvent(self, event):
+        if not self.waveform_data:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Tính toán các thông số một lần
+        center_y = self.height() // 2
+        width = self.width()
+        samples = len(self.waveform_data)
+        gap = 22
+        
+        # Tính số lượng vạch cần vẽ
+        num_bars = width // gap
+        
+        # Tính khoảng cách giữa các mẫu
+        sample_step = samples // num_bars
+        
+        for i in range(num_bars):
+            x = i * gap
+            # Lấy giá trị trung bình của một nhóm mẫu
+            start_idx = i * sample_step
+            end_idx = min((i + 1) * sample_step, samples)
+            magnitude = np.mean(self.waveform_data[start_idx:end_idx])
+            
+            height = int(200 * magnitude)
+            if height < 2:
+                height = 2
+                
+            pen = QPen(QColor("#FBFFE4"), 8)
+            pen.setCapStyle(Qt.RoundCap)
+            painter.setPen(pen)
+            painter.drawLine(x, center_y + height, x, center_y - height)

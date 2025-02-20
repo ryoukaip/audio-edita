@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
+from function.function_wavevisual import WaveformWidget
 
 class DropAreaLabel(QLabel):
     file_dropped = pyqtSignal(str)
@@ -78,6 +79,13 @@ class DropAreaLabel(QLabel):
         upper_layout.setAlignment(Qt.AlignTop)
         upper_layout.setSpacing(0)
 
+        # Tạo container cho seekbar và waveform
+        seekbar_container = QWidget()
+        seekbar_container.setFixedHeight(190)
+        seekbar_layout = QVBoxLayout(seekbar_container)
+        seekbar_layout.setContentsMargins(0, 0, 0, 0)
+        seekbar_layout.setSpacing(0)
+
         # Create seekbar as background
         self.seekbar = QSlider(Qt.Horizontal)
         self.seekbar.setFixedHeight(190)
@@ -108,8 +116,16 @@ class DropAreaLabel(QLabel):
         self.seekbar.sliderMoved.connect(self.seek_position)
         self.seekbar.setEnabled(False)
 
-        # Add seekbar to upper section
-        upper_layout.addWidget(self.seekbar)
+        # Tạo waveform widget
+        self.waveform = WaveformWidget(self.seekbar)
+        self.waveform.setFixedHeight(190)
+        
+        # Đảm bảo waveform có cùng kích thước với seekbar
+        self.waveform.setGeometry(self.seekbar.geometry())
+        
+        # Thêm vào layout
+        seekbar_layout.addWidget(self.seekbar)
+        upper_layout.addWidget(seekbar_container)
 
         # Lower section (controls)
         lower_widget = QWidget()
@@ -164,7 +180,8 @@ class DropAreaLabel(QLabel):
 
     def set_audio_file(self, file_path):
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(file_path)))
-        self.seekbar.setEnabled(True)
+        self.seekbar.setEnabled(False)
+        self.waveform.load_audio(file_path)
         self.stacked_widget.setCurrentIndex(1)  # Switch to player UI
         
     def dragEnterEvent(self, event):
@@ -214,6 +231,10 @@ class DropAreaLabel(QLabel):
     def position_changed(self, position):
         if not self.seekbar.isSliderDown():
             self.seekbar.setValue(position)
+        duration = self.player.duration()
+        if duration > 0:
+            progress = (position / duration) * 100
+            self.waveform.set_progress(progress)
         self.current_time.setText(self.format_time(position))
 
     def duration_changed(self, duration):
