@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontDatabase
 from function.function_playaudio import DropAreaLabel
+from function.output_separate import OutputSeparateWidget
 
 class SeparatePage(QWidget):
     def __init__(self):
@@ -138,6 +139,7 @@ class SeparatePage(QWidget):
                 background-color: #7d8bd4;
             }
         """)
+        export_btn.clicked.connect(self.show_output_widget)
         
         # Add content and export button to main layout
         main_layout.addLayout(content_layout)
@@ -148,6 +150,12 @@ class SeparatePage(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(main_widget)
         self.setLayout(layout)
+
+    def show_output_widget(self):
+        if self.selected_file:
+            main_window = self.window()
+            # Switch to output widget (index 3 in stack)
+            main_window.stack.setCurrentIndex(3)
 
     def handle_file_dropped(self, file_path):
         self.selected_file = file_path

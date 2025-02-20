@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QPropertyAnimation, QEasingCurve
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
@@ -119,9 +119,17 @@ class DropAreaLabel(QLabel):
         # Tạo waveform widget
         self.waveform = WaveformWidget(self.seekbar)
         self.waveform.setFixedHeight(190)
-        
-        # Đảm bảo waveform có cùng kích thước với seekbar
         self.waveform.setGeometry(self.seekbar.geometry())
+
+        # Add timer for smooth updates
+        self.update_timer = QTimer()
+        self.update_timer.setInterval(8)  # ~60fps
+        self.update_timer.timeout.connect(self.update_position)
+        
+        # Add animation
+        self.seekbar_animation = QPropertyAnimation(self.seekbar, b"value")
+        self.seekbar_animation.setEasingCurve(QEasingCurve.Linear)
+        self.seekbar_animation.setDuration(8)
         
         # Thêm vào layout
         seekbar_layout.addWidget(self.seekbar)
@@ -217,25 +225,46 @@ class DropAreaLabel(QLabel):
     def toggle_playback(self):
         if self.player.state() == QMediaPlayer.PlayingState:
             self.player.pause()
+            self.update_timer.stop()
         else:
             self.player.play()
+            self.update_timer.start()
 
     def on_state_changed(self, state):
         if state == QMediaPlayer.PlayingState:
             self.play_btn.setIcon(self.pause_icon)
             self.is_playing = True
+            self.waveform.set_playing(True)  # Add this line
         else:
             self.play_btn.setIcon(self.play_icon)
             self.is_playing = False
+            self.waveform.set_playing(False)  # Add this line
+
+    def update_position(self):
+        if not self.seekbar.isSliderDown():
+            position = self.player.position()
+            # Use animation for smooth movement
+            self.seekbar_animation.setStartValue(self.seekbar.value())
+            self.seekbar_animation.setEndValue(position)
+            self.seekbar_animation.start()
+            
+            # Update waveform progress
+            duration = self.player.duration()
+            if duration > 0:
+                progress = (position / duration) * 100
+                self.waveform.set_progress(progress)
+            self.current_time.setText(self.format_time(position))
+
 
     def position_changed(self, position):
-        if not self.seekbar.isSliderDown():
+        # Only update when manually seeking
+        if self.seekbar.isSliderDown():
             self.seekbar.setValue(position)
-        duration = self.player.duration()
-        if duration > 0:
-            progress = (position / duration) * 100
-            self.waveform.set_progress(progress)
-        self.current_time.setText(self.format_time(position))
+            duration = self.player.duration()
+            if duration > 0:
+                progress = (position / duration) * 100
+                self.waveform.set_progress(progress)
+            self.current_time.setText(self.format_time(position))
 
     def duration_changed(self, duration):
         self.seekbar.setRange(0, duration)

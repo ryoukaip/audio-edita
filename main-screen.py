@@ -5,11 +5,13 @@ from PyQt5.QtCore import Qt, QSize, QPoint
 from edit import EditPage
 from separate import SeparatePage
 from check import CheckPage
+from function.output_separate import OutputSeparateWidget
 
 class AudioEditorUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.current_button = None  # Biến lưu trạng thái nút đang chọn
+        self.output_widget = None
         self.initUI()
 
     def initUI(self):
@@ -93,6 +95,7 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(EditPage())
         self.stack.addWidget(SeparatePage())
         self.stack.addWidget(CheckPage())
+        self.stack.addWidget(OutputSeparateWidget())
 
         self.edit_btn = QPushButton(" Edit")
         self.edit_btn.setIcon(QIcon("./icon/edit.png"))
