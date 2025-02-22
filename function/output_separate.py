@@ -1,8 +1,10 @@
 import os
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePolicy, QVBoxLayout)
+from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePolicy, QVBoxLayout, QScrollArea)
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
-
+from function.function_openlocation import open_file_location
+from function.function_playaudio import DropAreaLabel
+from function.function_scrollarea import CustomScrollArea
 
 class OutputSeparateWidget(QWidget):
     def __init__(self, parent=None):
@@ -15,17 +17,22 @@ class OutputSeparateWidget(QWidget):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(10)
 
-        # Create tracks container widget
-        tracks_widget = QWidget()
-        tracks_layout = QVBoxLayout(tracks_widget)
-        tracks_layout.setContentsMargins(0, 0, 0, 0)
-        tracks_layout.setSpacing(10)
+        # Create custom scroll area
+        scroll_area = CustomScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # Create scroll content widget
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(10)
 
         # Create multiple rows of separated tracks
         for _ in range(5):  # Example: 5 tracks
             track_layout = QHBoxLayout()
             track_layout.setContentsMargins(10, 5, 10, 5)
-            track_layout.setSpacing(10)
+            track_layout.setSpacing(20)
 
             # Icon
             icon_label = QLabel()
@@ -39,42 +46,18 @@ class OutputSeparateWidget(QWidget):
             icon = QIcon("./icon/micro.png")
             icon_label.setPixmap(icon.pixmap(30, 30))
             
-            # Rounded rectangle
-            rect_widget = QWidget()
-            rect_widget.setFixedHeight(30)
-            rect_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed) 
-            rect_widget.setStyleSheet("""
-                QWidget {
-                    background-color: #7d8bd4;
-                    border-radius: 25px;
-                }
-            """)
+            # Replace rounded rectangle with audio player
+            audio_player = DropAreaLabel()
+            audio_player.setFixedHeight(150)  
+            audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-            # Play button
-            play_button = QPushButton()
-            play_button.setFixedSize(30, 30)
-            play_button.setIcon(QIcon("./icon/play.png"))
-            play_button.setStyleSheet("""
-                QPushButton {
-                    background-color: transparent;
-                    border: none;
-                }
-                QPushButton:hover {
-                    background-color: rgba(255, 255, 255, 0.1);
-                    border-radius: 15px;
-                }
-            """)
-
-            # Add widgets to track layout
             track_layout.addWidget(icon_label)
-            track_layout.addWidget(rect_widget)
-            track_layout.addWidget(play_button)
-            
-            # Add track layout to tracks layout
-            tracks_layout.addLayout(track_layout)
+            track_layout.addWidget(audio_player)
+            scroll_layout.addLayout(track_layout)
 
-        tracks_layout.addStretch()
-        main_layout.addWidget(tracks_widget)
+        scroll_layout.addStretch()
+        scroll_area.setWidget(scroll_content)
+        main_layout.addWidget(scroll_area, 1)
 
         # Add buttons
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
@@ -98,7 +81,7 @@ class OutputSeparateWidget(QWidget):
                 background-color: #7d8bd4;
             }
         """)
-        open_location_btn.clicked.connect(self.open_file_location)
+        open_location_btn.clicked.connect(open_file_location)
 
         # Add Back button
         done_btn = QPushButton("Back")
@@ -121,18 +104,6 @@ class OutputSeparateWidget(QWidget):
         button_layout.addSpacing(10)  
         button_layout.addWidget(done_btn)
         main_layout.addLayout(button_layout)
-
-    def open_file_location(self):
-        # Get documents folder path
-        documents_path = os.path.join(os.path.expanduser("~"), "Documents")
-        output_dir = os.path.join(documents_path, "audio-edita")
-        
-        # Create directory if it doesn't exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        
-        # Open the directory
-        os.startfile(output_dir)
 
     def return_to_separate(self):
         # Get main window and switch back to separate page (index 1)
