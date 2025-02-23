@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontDatabase
-from function.function_playaudio import DropAreaLabel
+from screen.function.function_playaudio import DropAreaLabel
 
 class SeparatePage(QWidget):
     def __init__(self):

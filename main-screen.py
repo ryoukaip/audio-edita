@@ -7,22 +7,21 @@ from edit import EditPage
 from separate import SeparatePage
 from check import CheckPage
 
-from mixing import MixingPage
-from trim import TrimPage
-from merge import MergePage
-from split import SplitPage
-from volume import VolumePage
+from screen.edit.mixing import MixingPage
+from screen.edit.trim import TrimPage
+from screen.edit.merge import MergePage
+from screen.edit.split import SplitPage
+from screen.edit.volume import VolumePage
 
-from reverse import ReversePage
-from speed import SpeedPage
-from compress import CompressPage
-from convert import ConvertPage
-from voice import VoicePage
+from screen.edit.reverse import ReversePage
+from screen.edit.speed import SpeedPage
+from screen.edit.compress import CompressPage
+from screen.edit.convert import ConvertPage
+from screen.edit.voice import VoicePage
 
-from function.output_separate import OutputSeparateWidget
-from function.function_titlebar import CustomTitleBar
-from function.function_sidebar import CustomSidebar
-from function.function_functionbar import FunctionBar
+from screen.output.output_separate import OutputSeparateWidget
+from screen.function.function_titlebar import CustomTitleBar
+from screen.function.function_sidebar import CustomSidebar
 
 class AudioEditorUI(QMainWindow):
     def __init__(self):

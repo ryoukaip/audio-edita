@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase
-from function.function_functionbar import FunctionBar
+from screen.function.function_functionbar import FunctionBar
 
-class MergePage(QWidget):
+class CompressPage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -18,7 +18,7 @@ class MergePage(QWidget):
         layout.setContentsMargins(12, 12, 12, 12)
 
         # Add function bar
-        top_bar = FunctionBar("merge", font_family, self)
+        top_bar = FunctionBar("compress", font_family, self)
         layout.addLayout(top_bar)
         layout.addStretch()
         

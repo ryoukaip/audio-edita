@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase
-from function.function_functionbar import FunctionBar
+from screen.function.function_functionbar import FunctionBar
 
-class ReversePage(QWidget):
+class VolumePage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -18,7 +18,7 @@ class ReversePage(QWidget):
         layout.setContentsMargins(12, 12, 12, 12)
 
         # Add function bar
-        top_bar = FunctionBar("reverse", font_family, self)
+        top_bar = FunctionBar("volume", font_family, self)
         layout.addLayout(top_bar)
         layout.addStretch()
         

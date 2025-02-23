@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QProper
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
-from function.function_wavevisual import WaveformWidget
+from screen.function.function_wavevisual import WaveformWidget
 
 class DropAreaLabel(QLabel):
     file_dropped = pyqtSignal(str)
@@ -48,7 +48,7 @@ class DropAreaLabel(QLabel):
         
         # Drop area label
         drop_label = QLabel("click to select file or drop a file here")
-        drop_label.setFont(QFont(self.font_family, 14))
+        drop_label.setFont(QFont(self.font_family, 12))
         drop_label.setStyleSheet("color: white; border: none;")
         drop_label.setAlignment(Qt.AlignCenter)
         

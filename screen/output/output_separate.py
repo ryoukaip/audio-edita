@@ -2,9 +2,9 @@ import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePolicy, QVBoxLayout, QScrollArea)
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
-from function.function_openlocation import open_file_location
-from function.function_playaudio import DropAreaLabel
-from function.function_scrollarea import CustomScrollArea
+from screen.function.function_openlocation import open_file_location
+from screen.function.function_playaudio import DropAreaLabel
+from screen.function.function_scrollarea import CustomScrollArea
 
 class OutputSeparateWidget(QWidget):
     def __init__(self, parent=None):
