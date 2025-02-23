@@ -19,6 +19,9 @@ from screen.edit.compress import CompressPage
 from screen.edit.convert import ConvertPage
 from screen.edit.voice import VoicePage
 
+from screen.check.checkonline import CheckOnlinePage
+from screen.check.checkoffline import CheckOfflinePage
+
 from screen.output.output_separate import OutputSeparateWidget
 from screen.function.function_titlebar import CustomTitleBar
 from screen.function.function_sidebar import CustomSidebar
@@ -76,6 +79,10 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(CompressPage())
         self.stack.addWidget(ConvertPage())
         self.stack.addWidget(VoicePage())
+
+        self.stack.addWidget(CheckOnlinePage())
+        self.stack.addWidget(CheckOfflinePage())
+
         self.stack.addWidget(OutputSeparateWidget())
 
         content_layout.addWidget(self.sidebar, 1)

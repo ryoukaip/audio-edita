@@ -23,9 +23,6 @@ class IconButton(QPushButton):
             QPushButton:hover {
                 background-color: #292d47;
             }
-            QPushButton:pressed {
-                background-color: #7d8bd4;
-            }
         """)
 
         layout = QVBoxLayout(self)
@@ -90,6 +87,10 @@ class CheckPage(QWidget):
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
+            if text == "online":
+                btn.clicked.connect(self.show_online_page)
+            elif text == "offline":
+                btn.clicked.connect(self.show_offline_page)
             grid.addWidget(btn, *pos)
         
         container.setFixedWidth(300)
@@ -98,3 +99,16 @@ class CheckPage(QWidget):
         layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
+    def show_online_page (self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            online_page_index = 13  
+            stack.setCurrentIndex(online_page_index)
+
+    def show_offline_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            offline_page_index = 14  
+            stack.setCurrentIndex(offline_page_index)
