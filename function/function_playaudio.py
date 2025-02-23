@@ -47,7 +47,7 @@ class DropAreaLabel(QLabel):
         """)
         
         # Drop area label
-        drop_label = QLabel("select file or drop here")
+        drop_label = QLabel("click to select file or drop a file here")
         drop_label.setFont(QFont(self.font_family, 14))
         drop_label.setStyleSheet("color: white; border: none;")
         drop_label.setAlignment(Qt.AlignCenter)
@@ -206,6 +206,7 @@ class DropAreaLabel(QLabel):
                 self.set_audio_file(file_path)
                 self.file_dropped.emit(file_path)
                 break
+
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
