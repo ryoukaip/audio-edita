@@ -2,12 +2,27 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from PyQt5.QtCore import Qt, QSize, QPoint
+
 from edit import EditPage
 from separate import SeparatePage
 from check import CheckPage
+
+from mixing import MixingPage
+from trim import TrimPage
+from merge import MergePage
+from split import SplitPage
+from volume import VolumePage
+
+from reverse import ReversePage
+from speed import SpeedPage
+from compress import CompressPage
+from convert import ConvertPage
+from voice import VoicePage
+
 from function.output_separate import OutputSeparateWidget
 from function.function_titlebar import CustomTitleBar
 from function.function_sidebar import CustomSidebar
+from function.function_functionbar import FunctionBar
 
 class AudioEditorUI(QMainWindow):
     def __init__(self):
@@ -50,6 +65,18 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(EditPage())
         self.stack.addWidget(SeparatePage())
         self.stack.addWidget(CheckPage())
+
+        self.stack.addWidget(MixingPage())
+        self.stack.addWidget(TrimPage())
+        self.stack.addWidget(MergePage())
+        self.stack.addWidget(SplitPage())
+        self.stack.addWidget(VolumePage())
+
+        self.stack.addWidget(ReversePage())
+        self.stack.addWidget(SpeedPage())
+        self.stack.addWidget(CompressPage())
+        self.stack.addWidget(ConvertPage())
+        self.stack.addWidget(VoicePage())
         self.stack.addWidget(OutputSeparateWidget())
 
         content_layout.addWidget(self.sidebar, 1)

@@ -22,9 +22,6 @@ class IconButton(QPushButton):
             QPushButton:hover {
                 background-color: #292d47;
             }
-            QPushButton:pressed {
-                background-color: #7d8bd4;
-            }
         """)
 
         layout = QVBoxLayout(self)
@@ -94,6 +91,26 @@ class EditPage(QWidget):
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
+            if text == "trim":
+                btn.clicked.connect(self.show_trim_page)
+            elif text == "mixing":
+                btn.clicked.connect(self.show_mixing_page)
+            elif text == "merge":
+                btn.clicked.connect(self.show_merge_page)
+            elif text == "split":
+                btn.clicked.connect(self.show_split_page)
+            elif text == "volume":
+                btn.clicked.connect(self.show_volume_page)
+            elif text == "reverse":
+                btn.clicked.connect(self.show_reverse_page)
+            elif text == "speed":
+                btn.clicked.connect(self.show_speed_page)
+            elif text == "compress":
+                btn.clicked.connect(self.show_compress_page)
+            elif text == "convert":
+                btn.clicked.connect(self.show_convert_page)
+            elif text == "voice":
+                btn.clicked.connect(self.show_voice_page)
             grid.addWidget(btn, *pos)
 
         container.setFixedWidth(650)
@@ -101,3 +118,74 @@ class EditPage(QWidget):
         layout.addLayout(title_subtitle_layout)
         layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
+
+    def show_mixing_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            mixing_page_index = 3  # Index of MixingPage in the stack
+            stack.setCurrentIndex(mixing_page_index)
+
+    def show_trim_page(self):
+        # Get the main window's stacked widget and switch to trim page
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            trim_page_index = 4  # Index of TrimPage in the stack
+            stack.setCurrentIndex(trim_page_index)
+
+    def show_merge_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            merge_page_index = 5  # Index of MergePage in the stack
+            stack.setCurrentIndex(merge_page_index)
+
+    def show_split_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            split_page_index = 6  # Index of SplitPage in the stack
+            stack.setCurrentIndex(split_page_index)
+
+    def show_volume_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            volume_page_index = 7  # Index of VolumePage in the stack
+            stack.setCurrentIndex(volume_page_index)
+
+    def show_reverse_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            reverse_page_index = 8  # Index of ReversePage in the stack
+            stack.setCurrentIndex(reverse_page_index)
+
+    def show_speed_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            speed_page_index = 9  # Index of SpeedPage in the stack
+            stack.setCurrentIndex(speed_page_index)
+
+    def show_compress_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            compress_page_index = 10  # Index of CompressPage in the stack
+            stack.setCurrentIndex(compress_page_index)
+
+    def show_convert_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            convert_page_index = 11  # Index of ConvertPage in the stack
+            stack.setCurrentIndex(convert_page_index)
+
+    def show_voice_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            voice_page_index = 12  # Index of VoicePage in the stack
+            stack.setCurrentIndex(voice_page_index)
