@@ -18,27 +18,38 @@ class SeparatePage(QWidget):
         # Content layout (everything except Export button)
         content_layout = QVBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
-    
+
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
 
+        # Create container for drop area and columns with fixed spacing
+        drop_columns_container = QWidget()
+        drop_columns_layout = QVBoxLayout(drop_columns_container)
+        drop_columns_layout.setContentsMargins(0, 0, 0, 0)
+        drop_columns_layout.setSpacing(20)
+
         self.drop_area = DropAreaLabel()
         self.drop_area.file_dropped.connect(self.handle_file_dropped)
 
-        # Create options layout
-        options_layout = QHBoxLayout()  # Change to horizontal to create two columns
-        
-        # Left column - number buttons
-        left_column = QVBoxLayout()
-        left_column.setSpacing(10)
+        # Create container for both columns
+        columns_container = QWidget()
+        columns_container.setFixedWidth(600)
+        columns_layout = QHBoxLayout(columns_container)
+        columns_layout.setContentsMargins(0, 10, 0, 0)
+
+        # Left column container
+        left_container = QWidget()
+        left_column = QVBoxLayout(left_container)
+        left_column.setSpacing(20)
         left_column.setContentsMargins(50, 0, 25, 0)
 
-        # Right column - checkboxes
-        right_column = QVBoxLayout()
-        right_column.setSpacing(10)
+        # Right column container
+        right_container = QWidget()
+        right_column = QVBoxLayout(right_container)
+        right_column.setSpacing(20)
         right_column.setContentsMargins(25, 0, 50, 0)
-        
+
         # Create button group for exclusive selection
         button_group = QButtonGroup(self)
         button_group.setExclusive(True)
@@ -70,7 +81,6 @@ class SeparatePage(QWidget):
                     background-color: #7d8bd4;
                 }
             """)
-            btn.setCheckable(True)
             
             label = QLabel(text)
             label.setFont(QFont(font_family, 13))
@@ -116,13 +126,17 @@ class SeparatePage(QWidget):
             
             right_column.addLayout(checkbox_row)
 
-        # Add both columns to options layout
-        options_layout.addLayout(left_column)
-        options_layout.addLayout(right_column)
+        # Add columns to container
+        columns_layout.addWidget(left_container)
+        columns_layout.addWidget(right_container)
         
-        content_layout.addWidget(self.drop_area)
-        content_layout.addSpacing(20)
-        content_layout.addLayout(options_layout)
+        # Add widgets to drop_columns_container with fixed spacing
+        drop_columns_layout.addWidget(self.drop_area)
+        drop_columns_layout.addWidget(columns_container, 0, Qt.AlignCenter)
+        drop_columns_layout.addStretch()
+
+        # Add drop_columns_container to content layout
+        content_layout.addWidget(drop_columns_container)
         
         # Create export button
         export_btn = QPushButton("Export")
@@ -154,9 +168,9 @@ class SeparatePage(QWidget):
         if self.selected_file:
             main_window = self.window()
             # Switch to output widget (index 3 in stack)
-            main_window.stack.setCurrentIndex(3)
+            main_window.stack.setCurrentIndex(15)
 
     def handle_file_dropped(self, file_path):
         self.selected_file = file_path
         # Here you can add additional logic to handle the selected file
-        print(f"Selected audio file: {file_path}")
+        print(f"Selected audio file: {file_path}") 

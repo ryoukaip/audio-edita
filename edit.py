@@ -123,69 +123,58 @@ class EditPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            mixing_page_index = 3  # Index of MixingPage in the stack
-            stack.setCurrentIndex(mixing_page_index)
+            stack.setCurrentIndex(3)
 
     def show_trim_page(self):
-        # Get the main window's stacked widget and switch to trim page
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            trim_page_index = 4  # Index of TrimPage in the stack
-            stack.setCurrentIndex(trim_page_index)
+            stack.setCurrentIndex(4)
 
     def show_merge_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            merge_page_index = 5  # Index of MergePage in the stack
-            stack.setCurrentIndex(merge_page_index)
+            stack.setCurrentIndex(5)
 
     def show_split_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            split_page_index = 6  # Index of SplitPage in the stack
-            stack.setCurrentIndex(split_page_index)
+            stack.setCurrentIndex(6)
 
     def show_volume_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            volume_page_index = 7  # Index of VolumePage in the stack
-            stack.setCurrentIndex(volume_page_index)
+            stack.setCurrentIndex(7)
 
     def show_reverse_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            reverse_page_index = 8  # Index of ReversePage in the stack
-            stack.setCurrentIndex(reverse_page_index)
+            stack.setCurrentIndex(8)
 
     def show_speed_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            speed_page_index = 9  # Index of SpeedPage in the stack
-            stack.setCurrentIndex(speed_page_index)
+            stack.setCurrentIndex(9)
 
     def show_compress_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            compress_page_index = 10  # Index of CompressPage in the stack
-            stack.setCurrentIndex(compress_page_index)
+            stack.setCurrentIndex(10)
 
     def show_convert_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            convert_page_index = 11  # Index of ConvertPage in the stack
-            stack.setCurrentIndex(convert_page_index)
+            stack.setCurrentIndex(11)
 
     def show_voice_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            voice_page_index = 12  # Index of VoicePage in the stack
-            stack.setCurrentIndex(voice_page_index)
+            stack.setCurrentIndex(12)

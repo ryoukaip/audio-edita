@@ -28,5 +28,4 @@ class CheckOfflinePage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            edit_page_index = 2
-            stack.setCurrentIndex(edit_page_index)
+            stack.setCurrentIndex(2)

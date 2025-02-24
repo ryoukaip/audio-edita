@@ -103,12 +103,10 @@ class CheckPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            online_page_index = 13  
-            stack.setCurrentIndex(online_page_index)
+            stack.setCurrentIndex(13)
 
     def show_offline_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            offline_page_index = 14  
-            stack.setCurrentIndex(offline_page_index)
+            stack.setCurrentIndex(14)

@@ -75,6 +75,12 @@ class WaveformWidget(QWidget):
         self.is_playing = is_playing
         self.update()
 
+    def set_waveform_data(self, waveform_data):
+        if self.waveform_data is not None:
+            self.prev_waveform_data = self.waveform_data.copy()
+        self.waveform_data = waveform_data
+        self.start_transition_animation()
+
     def paintEvent(self, event):
         if not self.waveform_data:
             return

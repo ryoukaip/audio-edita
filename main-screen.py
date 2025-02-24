@@ -100,6 +100,14 @@ class AudioEditorUI(QMainWindow):
         self.is_maximized = False
 
     def toggleMaximize(self):
+        if not self.is_maximized:
+            # Khi maximize, thay đổi tỉ lệ thành 1:12
+            self.content_layout.setStretch(0, 1)  # sidebar
+            self.content_layout.setStretch(1, 8)  # stack
+        else:
+            # Khi restore, trở về tỉ lệ 1:4 mặc định
+            self.content_layout.setStretch(0, 1)  # sidebar
+            self.content_layout.setStretch(1, 4)  # stack
         self.title_bar.toggleMaximize()
 
     def handle_sidebar_button(self, index, button):

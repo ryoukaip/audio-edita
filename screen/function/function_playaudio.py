@@ -1,8 +1,37 @@
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QPropertyAnimation, QEasingCurve
+import librosa
+import numpy as np
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QPropertyAnimation, QEasingCurve, QThread
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
 from screen.function.function_wavevisual import WaveformWidget
+
+class AudioLoadWorker(QThread):
+    finished = pyqtSignal(str, tuple)  # Signal to emit when loading is complete
+    
+    def __init__(self, file_path):
+        super().__init__()
+        self.file_path = file_path
+        
+    def run(self):
+        try:
+            # Load audio với sr thấp hơn để giảm dữ liệu
+            audio, sr = librosa.load(self.file_path, sr=22050, mono=True)
+            
+            # Giảm số lượng mẫu bằng cách lấy trung bình
+            target_samples = 1000
+            samples_per_pixel = len(audio) // target_samples
+            
+            if samples_per_pixel > 1:
+                waveform_data = np.array_split(audio, target_samples)
+                waveform_data = [np.mean(np.abs(chunk)) for chunk in waveform_data]
+            else:
+                waveform_data = audio
+                
+            self.finished.emit(self.file_path, (waveform_data, sr))
+        except Exception as e:
+            print(f"Error loading audio: {e}")
+            self.finished.emit(self.file_path, None)
 
 class DropAreaLabel(QLabel):
     file_dropped = pyqtSignal(str)
@@ -187,10 +216,20 @@ class DropAreaLabel(QLabel):
         self.player.durationChanged.connect(self.duration_changed)
 
     def set_audio_file(self, file_path):
+        # Set media content immediately for player
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(file_path)))
         self.seekbar.setEnabled(False)
-        self.waveform.load_audio(file_path)
         self.stacked_widget.setCurrentIndex(1)  # Switch to player UI
+        
+        # Create and start worker thread for audio loading
+        self.loading_worker = AudioLoadWorker(file_path)
+        self.loading_worker.finished.connect(self.on_audio_loaded)
+        self.loading_worker.start()
+    
+    def on_audio_loaded(self, file_path, data):
+        if data:
+            waveform_data, sr = data
+            self.waveform.set_waveform_data(waveform_data)
         
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

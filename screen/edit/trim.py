@@ -28,5 +28,4 @@ class TrimPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            edit_page_index = 0
-            stack.setCurrentIndex(edit_page_index)
+            stack.setCurrentIndex(0)
