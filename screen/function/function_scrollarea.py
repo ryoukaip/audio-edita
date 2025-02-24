@@ -21,6 +21,14 @@ class CustomScrollArea(QScrollArea):
         self.fade_animation = QPropertyAnimation(self, b"scroll_alpha")
         self.fade_animation.setDuration(200)
         self.fade_animation.setEasingCurve(QEasingCurve.InOutQuad)
+
+        # Add smooth scroll animation
+        self.scroll_animation = QPropertyAnimation(self.verticalScrollBar(), b"value")
+        self.scroll_animation.setDuration(250)  # Giảm duration xuống
+        self.scroll_animation.setEasingCurve(QEasingCurve.OutExpo)  # Đổi curve
+        self.scroll_step = 120  # Thêm scroll step cố định
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
         # Initialize scrollbar as hidden
         self.updateScrollBarStyle(0)
@@ -60,8 +68,28 @@ class CustomScrollArea(QScrollArea):
         self.verticalScrollBar().setStyleSheet(style)
 
     def wheelEvent(self, event):
-        super().wheelEvent(event)
-        self.show_scrollbar()
+        # Cancel any ongoing scroll animation
+        self.scroll_animation.stop()
+        
+        # Calculate target scroll position
+        delta = event.angleDelta().y()
+        delta = self.scroll_step if delta > 0 else -self.scroll_step
+        
+        current_value = self.verticalScrollBar().value()
+        target_value = current_value - delta
+        
+        # Clamp target value within scrollbar range
+        maximum = self.verticalScrollBar().maximum()
+        minimum = self.verticalScrollBar().minimum()
+        target_value = max(minimum, min(maximum, target_value))
+        
+        if target_value != current_value:
+            self.scroll_animation.setStartValue(current_value)
+            self.scroll_animation.setEndValue(target_value)
+            self.scroll_animation.start()
+            self.show_scrollbar()
+        
+        event.accept()
         
     def show_scrollbar(self):
         self.fade_timer.stop()
