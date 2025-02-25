@@ -1,2 +1,11 @@
 **/__pycache__/
 __pycache__/
+my_audio_env/Lib/
+my_audio_env/
+pretrained_models/
+__pycache__/
+*.pyd
+*.dll
+*.exe
+
+

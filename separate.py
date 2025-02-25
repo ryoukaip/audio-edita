@@ -1,13 +1,19 @@
+import os
+import sys
+import subprocess
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.playaudio.function_playaudio import DropAreaLabel
+from screen.function.separate.function_separate import SpleeterSeparator, start_separation
+
 
 class SeparatePage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
         self.selected_file = None
+        self.selected_stems = 2  # Default value
     
     def initUI(self):
         # Create main widget to hold everything
@@ -51,8 +57,9 @@ class SeparatePage(QWidget):
         right_column.setContentsMargins(25, 0, 50, 0)
 
         # Create button group for exclusive selection
-        button_group = QButtonGroup(self)
-        button_group.setExclusive(True)
+        self.button_group = QButtonGroup(self)  # Change this line
+        self.button_group.setExclusive(True)
+        self.button_group.buttonClicked.connect(self.handle_stem_selection)
 
         # Left column content - number buttons
         options = [
@@ -70,7 +77,7 @@ class SeparatePage(QWidget):
             btn.setFixedSize(54, 50)
             btn.setFont(QFont(font_family, 16))
             btn.setCheckable(True)
-            button_group.addButton(btn)
+            self.button_group.addButton(btn)
             btn.setStyleSheet("""
                 QPushButton {
                     background-color: #323754;
@@ -165,12 +172,56 @@ class SeparatePage(QWidget):
         self.setLayout(layout)
 
     def show_output_widget(self):
-        if self.selected_file:
-            main_window = self.window()
-            # Switch to output widget (index 3 in stack)
-            main_window.stack.setCurrentIndex(15)
+        if not self.selected_file:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "Error", "Please select an audio file first")
+            return
+
+        try:
+            # Get selected stems
+            stems = self.selected_stems
+            
+            # Create output directory in Documents folder
+            documents_path = os.path.expanduser("~\\Documents\\audio-edita")
+            output_dir = os.path.join(documents_path, "separate")
+            os.makedirs(output_dir, exist_ok=True)
+
+            # Start separation with proper path handling
+            self.separator = start_separation(
+                input_file=self.selected_file,
+                output_dir=output_dir,
+                stems=stems,
+                high_quality=True  # You can make this configurable
+            )
+
+            # Connect signals
+            self.separator.progress.connect(self.update_progress)
+            self.separator.finished.connect(self.separation_complete)
+            self.separator.error.connect(self.separation_error)
+
+        except Exception as e:
+            self.separation_error(str(e))
+
+    def update_progress(self, message):
+        """Handle progress updates from separator"""
+        print(f"Progress: {message}")
+        # Add progress bar or label update here
+
+    def separation_complete(self, output_path):
+        """Handle completion of separation"""
+        print(f"Separation complete. Output at: {output_path}")
+        main_window = self.window()
+        main_window.stack.setCurrentIndex(15)  # Switch to output view
+
+    def separation_error(self, error_message):
+        """Handle separation errors"""
+        print(f"Error: {error_message}")
+        # Show error message to user
 
     def handle_file_dropped(self, file_path):
-        self.selected_file = file_path
-        # Here you can add additional logic to handle the selected file
-        print(f"Selected audio file: {file_path}") 
+        # Store the file path from DropAreaLabel
+        self.selected_file = os.path.abspath(file_path)  # Get absolute path
+        print(f"Selected audio file: {self.selected_file}")
+
+    def handle_stem_selection(self, button):
+        self.selected_stems = int(button.text())
