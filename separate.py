@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontDatabase
-from screen.function.function_playaudio import DropAreaLabel
+from screen.function.playaudio.function_playaudio import DropAreaLabel
 
 class SeparatePage(QWidget):
     def __init__(self):
@@ -144,12 +144,12 @@ class SeparatePage(QWidget):
         export_btn.setFont(QFont(font_family, 13))
         export_btn.setStyleSheet("""
             QPushButton {
-                background-color: #474f7a;
+                background-color: #3a4062;
                 border-radius: 12px;
                 color: white;
             }
-            QPushButton:pressed {
-                background-color: #7d8bd4;
+            QPushButton:hover {
+                background-color: #474f7a;
             }
         """)
         export_btn.clicked.connect(self.show_output_widget)

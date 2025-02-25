@@ -4,7 +4,8 @@ from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QProper
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
-from screen.function.function_wavevisual import WaveformWidget
+from screen.function.playaudio.function_wavevisual import WaveformWidget
+from screen.function.playaudio.function_playloading import LoadingSpinner, LoadingOverlay
 
 class AudioLoadWorker(QThread):
     finished = pyqtSignal(str, tuple)  # Signal to emit when loading is complete
@@ -48,6 +49,7 @@ class DropAreaLabel(QLabel):
         # Initialize media player
         self.player = QMediaPlayer()
         self.is_playing = False
+        self.first_load = True  # Add this line after super().__init__
         
         self.setupUI()
         
@@ -63,6 +65,9 @@ class DropAreaLabel(QLabel):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.stacked_widget)
+        
+        self.loading_overlay = LoadingOverlay(self)
+        self.loading_overlay.setGeometry(self.rect())
         
     def setup_drop_area_ui(self):
         # Drop area widget
@@ -221,6 +226,10 @@ class DropAreaLabel(QLabel):
         self.seekbar.setEnabled(False)
         self.stacked_widget.setCurrentIndex(1)  # Switch to player UI
         
+        # Only show loading overlay on first load
+        if self.first_load:
+            self.loading_overlay.show_loading()
+        
         # Create and start worker thread for audio loading
         self.loading_worker = AudioLoadWorker(file_path)
         self.loading_worker.finished.connect(self.on_audio_loaded)
@@ -230,6 +239,10 @@ class DropAreaLabel(QLabel):
         if data:
             waveform_data, sr = data
             self.waveform.set_waveform_data(waveform_data)
+        if self.first_load:
+            self.loading_overlay.hide_loading()
+            self.first_load = False  # Set to False after first load
+        self.seekbar.setEnabled(True)
         
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -323,3 +336,7 @@ class DropAreaLabel(QLabel):
     def _is_audio_file(file_path):
         audio_extensions = {'.mp3', '.wav', '.ogg', '.m4a', '.flac'}
         return any(file_path.lower().endswith(ext) for ext in audio_extensions)
+        
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.loading_overlay.setGeometry(self.rect())

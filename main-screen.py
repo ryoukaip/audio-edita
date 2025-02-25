@@ -23,8 +23,8 @@ from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
 
 from screen.output.output_separate import OutputSeparateWidget
-from screen.function.function_titlebar import CustomTitleBar
-from screen.function.function_sidebar import CustomSidebar
+from screen.function.mainscreen.function_titlebar import CustomTitleBar
+from screen.function.mainscreen.function_sidebar import CustomSidebar
 
 class AudioEditorUI(QMainWindow):
     def __init__(self):

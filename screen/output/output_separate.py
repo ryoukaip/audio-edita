@@ -2,9 +2,9 @@ import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePolicy, QVBoxLayout, QScrollArea)
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
-from screen.function.function_openlocation import open_file_location
-from screen.function.function_playaudio import DropAreaLabel
-from screen.function.function_scrollarea import CustomScrollArea
+from screen.function.system.function_openlocation import open_file_location
+from screen.function.playaudio.function_playaudio import DropAreaLabel
+from screen.function.system.function_scrollarea import CustomScrollArea
 
 class OutputSeparateWidget(QWidget):
     def __init__(self, parent=None):
@@ -73,12 +73,12 @@ class OutputSeparateWidget(QWidget):
         open_location_btn.setFont(QFont(font_family, 13))
         open_location_btn.setStyleSheet("""
             QPushButton {
-                background-color: #474f7a;
+                background-color: #3a4062;
                 border-radius: 12px;
                 color: white;
             }
-            QPushButton:pressed {
-                background-color: #7d8bd4;
+            QPushButton:hover {
+                background-color: #474f7a;
             }
         """)
         open_location_btn.clicked.connect(open_file_location)
@@ -89,12 +89,12 @@ class OutputSeparateWidget(QWidget):
         done_btn.setFont(QFont(font_family, 13))
         done_btn.setStyleSheet("""
             QPushButton {
-                background-color: #474f7a;
+                background-color: #3a4062;
                 border-radius: 12px;
                 color: white;
             }
-            QPushButton:pressed {
-                background-color: #7d8bd4;
+            QPushButton:hover {
+                background-color: #474f7a;
             }
         """)
         done_btn.clicked.connect(self.return_to_separate)

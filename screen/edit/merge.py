@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase
-from screen.function.function_functionbar import FunctionBar
+from screen.function.mainscreen.function_functionbar import FunctionBar
 
 class MergePage(QWidget):
     def __init__(self):
