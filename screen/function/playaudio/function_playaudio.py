@@ -186,12 +186,22 @@ class DropAreaLabel(QLabel):
         lower_layout.setAlignment(Qt.AlignVCenter)
 
         # Create play button with icon
+        self.back_btn = QPushButton()
+        self.back_btn.setFixedSize(30, 30)
+        self.back_btn.setIcon(QIcon("./icon/arrow-back.png"))
+        self.back_btn.clicked.connect(lambda: self.seek_relative(-5000))  # 5 seconds backward
+        
         self.play_btn = QPushButton()
         self.play_btn.setFixedSize(20, 20)
         self.play_icon = QIcon("./icon/play.png")
         self.pause_icon = QIcon("./icon/pause.png")
         self.play_btn.setIcon(self.play_icon)
         self.play_btn.clicked.connect(self.toggle_playback)
+        
+        self.forward_btn = QPushButton()
+        self.forward_btn.setFixedSize(30, 30)
+        self.forward_btn.setIcon(QIcon("./icon/arrow-forward.png"))
+        self.forward_btn.clicked.connect(lambda: self.seek_relative(5000))  # 5 seconds forward
 
         # Create time labels
         self.current_time = QLabel("00:00")
@@ -205,7 +215,9 @@ class DropAreaLabel(QLabel):
         # Add elements to lower section
         lower_layout.addWidget(self.current_time)
         lower_layout.addStretch()
+        lower_layout.addWidget(self.back_btn)
         lower_layout.addWidget(self.play_btn)
+        lower_layout.addWidget(self.forward_btn)
         lower_layout.addStretch()
         lower_layout.addWidget(self.total_time)
 
@@ -340,3 +352,7 @@ class DropAreaLabel(QLabel):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.loading_overlay.setGeometry(self.rect())
+        
+    def seek_relative(self, ms):
+        new_position = self.player.position() + ms
+        self.player.setPosition(new_position)
