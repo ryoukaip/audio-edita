@@ -18,7 +18,7 @@ class SpleeterSeparator(QThread):
     def run(self):
         try:
             # Check ffmpeg installation with specific path
-            ffmpeg_path = r"C:\Users\Moritaka\scoop\shims\ffmpeg.exe"
+            ffmpeg_path = os.path.join(os.path.expanduser("~"), "scoop", "shims", "ffmpeg.exe")
             if not os.path.exists(ffmpeg_path):
                 self.error.emit(f"FFmpeg not found at {ffmpeg_path}")
                 return
@@ -42,6 +42,8 @@ class SpleeterSeparator(QThread):
                 stem_config = "spleeter:5stems"
             else:
                 raise ValueError(f"Invalid number of stems: {self.stems}")
+
+            self.progress.emit("Loading audio file")
 
             # Construct command as a list (don't join as string)
             command = [
@@ -76,6 +78,9 @@ class SpleeterSeparator(QThread):
                     break
                 if output:
                     self.progress.emit(output.strip())
+                    # Thêm các thông báo chi tiết hơn dựa trên trạng thái
+                    if "Loading tensorflow model" in output:
+                        self.progress.emit("Loading AI separation model")
 
             # Check for errors
             if process.returncode != 0:

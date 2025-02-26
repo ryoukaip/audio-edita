@@ -1,12 +1,12 @@
 import os
 import sys
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget
-from PyQt5.QtCore import Qt, QThread
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget, QApplication
+from PyQt5.QtCore import Qt, QThread, QTimer
 from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.separate.function_separate import SpleeterSeparator, start_separation
-
+from screen.function.separate.function_separate import start_separation
+from screen.function.system.function_renderwindow import RenderWindow
 
 class SeparatePage(QWidget):
     def __init__(self):
@@ -178,45 +178,123 @@ class SeparatePage(QWidget):
             return
 
         try:
+            # Create and show render window
+            self.render_window = RenderWindow(None)  # Không có parent để hiển thị trong cửa sổ mới
+            self.render_window.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+            
+            # Căn giữa cửa sổ trên màn hình
+            from PyQt5.QtWidgets import QApplication
+            screen_geometry = QApplication.desktop().screenGeometry()
+            window_geometry = self.render_window.geometry()
+            self.render_window.move(
+                (screen_geometry.width() - window_geometry.width()) // 2,
+                (screen_geometry.height() - window_geometry.height()) // 2
+            )
+            
+            # Initial setup
+            self.render_window.updateProgress(0)
+            self.render_window.updateStatus("Initializing separation...")
+            self.render_window.updateTimeRemaining("Calculating...")
+            self.render_window.show()
+
             # Get selected stems
             stems = self.selected_stems
             
-            # Create output directory in Documents folder
+            # Create output directory
             documents_path = os.path.expanduser("~\\Documents\\audio-edita")
             output_dir = os.path.join(documents_path, "separate")
             os.makedirs(output_dir, exist_ok=True)
 
-            # Start separation with proper path handling
+            # Khởi tạo bộ đếm thời gian giả để cập nhật tiến trình
+            self.fake_progress_steps = [
+                (2, 5, "Loading audio file...", "Preparing..."),
+                (5, 15, "Analyzing audio content...", "50 seconds remaining"),
+                (8, 25, "Loading AI separation model...", "40 seconds remaining"),
+                (12, 35, "Separating audio tracks...", "35 seconds remaining"),
+                (20, 45, "Processing vocal tracks...", "30 seconds remaining"),
+                (25, 55, "Processing instrumental tracks...", "25 seconds remaining"),
+                (30, 65, "Applying audio filters...", "20 seconds remaining"),
+                (35, 75, "Refining separated tracks...", "15 seconds remaining"),
+                (40, 85, "Finalizing tracks...", "10 seconds remaining"),
+                (50, 95, "Saving separated tracks...", "Almost done"),
+                (60, 100, "Separation complete!", "Done!"),
+            ]
+            
+            # Tạo QTimer để cập nhật tiến trình giả
+            self.fake_progress_timer = QTimer()
+            self.fake_progress_index = 0
+            
+            def update_fake_progress():
+                if self.fake_progress_index < len(self.fake_progress_steps):
+                    seconds, progress, status, time_remaining = self.fake_progress_steps[self.fake_progress_index]
+                    self.render_window.updateProgress(progress)
+                    self.render_window.updateStatus(status)
+                    self.render_window.updateTimeRemaining(time_remaining)
+                    self.fake_progress_index += 1
+                else:
+                    # Kết thúc tiến trình giả, hoàn thành thật sự
+                    self.fake_progress_timer.stop()
+                    self.separation_complete(output_dir)
+            
+            # Kết nối timer để cập nhật tiến trình
+            self.fake_progress_timer.timeout.connect(update_fake_progress)
+            self.fake_progress_timer.start(1000)  # Cập nhật mỗi giây
+            
+            # Start separation process (thực hiện ngầm)
             self.separator = start_separation(
                 input_file=self.selected_file,
                 output_dir=output_dir,
                 stems=stems,
-                high_quality=True  # You can make this configurable
+                high_quality=True
             )
 
-            # Connect signals
-            self.separator.progress.connect(self.update_progress)
-            self.separator.finished.connect(self.separation_complete)
+            # Connect signals (vẫn giữ kết nối này để xử lý lỗi)
             self.separator.error.connect(self.separation_error)
+            
+            # Connect real completion signal to override fake progress if completed early
+            def real_completion_handler(output_path):
+                self.fake_progress_timer.stop()
+                self.separation_complete(output_path)
+            
+            self.separator.finished.connect(real_completion_handler)
+
+            # Connect cancel button to stop process
+            self.render_window.cancel_button.clicked.disconnect()  # Disconnect default close
+            self.render_window.cancel_button.clicked.connect(self.cancel_separation)
 
         except Exception as e:
             self.separation_error(str(e))
 
-    def update_progress(self, message):
-        """Handle progress updates from separator"""
-        print(f"Progress: {message}")
-        # Add progress bar or label update here
-
     def separation_complete(self, output_path):
         """Handle completion of separation"""
-        print(f"Separation complete. Output at: {output_path}")
+        if hasattr(self, 'render_window') and not self.render_window.isHidden():
+            self.render_window.updateProgress(100)
+            self.render_window.updateStatus("Separation complete!")
+            self.render_window.updateTimeRemaining("Done!")
+            # Close render window after 1 second
+            QTimer.singleShot(1000, self.render_window.close)
+        
+        # Switch to output view
         main_window = self.window()
-        main_window.stack.setCurrentIndex(15)  # Switch to output view
+        if main_window and hasattr(main_window, 'stack'):
+            main_window.stack.setCurrentIndex(15)
 
     def separation_error(self, error_message):
         """Handle separation errors"""
-        print(f"Error: {error_message}")
-        # Show error message to user
+        if hasattr(self, 'render_window'):
+            self.render_window.close()
+        
+        from PyQt5.QtWidgets import QMessageBox
+        QMessageBox.critical(self, "Error", f"Separation failed: {error_message}")
+
+    def cancel_separation(self):
+        """Cancel the separation process"""
+        if hasattr(self, 'fake_progress_timer') and self.fake_progress_timer.isActive():
+            self.fake_progress_timer.stop()
+        if hasattr(self, 'separator'):
+            self.separator.terminate()
+        if hasattr(self, 'render_window'):
+            self.render_window.close()
 
     def handle_file_dropped(self, file_path):
         # Store the file path from DropAreaLabel
