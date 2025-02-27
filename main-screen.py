@@ -22,7 +22,7 @@ from screen.edit.voice import VoicePage
 from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
 
-from screen.output.output_separate import OutputSeparateWidget
+from screen.function.output.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
 

@@ -7,6 +7,7 @@ from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.separate.function_separate import start_separation
 from screen.function.system.function_renderwindow import RenderWindow
+from screen.function.output.output_separate import OutputSeparateWidget
 
 class SeparatePage(QWidget):
     def __init__(self):
@@ -217,12 +218,12 @@ class SeparatePage(QWidget):
                 (35, 75, "Refining separated tracks...", "15 seconds remaining"),
                 (40, 85, "Finalizing tracks...", "10 seconds remaining"),
                 (50, 95, "Saving separated tracks...", "Almost done"),
-                (60, 100, "Separation complete!", "Done!"),
             ]
             
             # Tạo QTimer để cập nhật tiến trình giả
             self.fake_progress_timer = QTimer()
             self.fake_progress_index = 0
+            self.separation_is_complete = False
             
             def update_fake_progress():
                 if self.fake_progress_index < len(self.fake_progress_steps):
@@ -232,9 +233,13 @@ class SeparatePage(QWidget):
                     self.render_window.updateTimeRemaining(time_remaining)
                     self.fake_progress_index += 1
                 else:
-                    # Kết thúc tiến trình giả, hoàn thành thật sự
+                    # Hoàn thành các bước giả nhưng vẫn chờ tiến trình thật
                     self.fake_progress_timer.stop()
-                    self.separation_complete(output_dir)
+                    # Đổi thành cập nhật ít thường xuyên hơn nếu vẫn đang chờ
+                    if not self.separation_is_complete:
+                        self.render_window.updateStatus("Separating audio...")
+                        self.render_window.updateTimeRemaining("please wait...")
+                        # Không đóng cửa sổ, chờ tín hiệu hoàn tất từ tiến trình thật
             
             # Kết nối timer để cập nhật tiến trình
             self.fake_progress_timer.timeout.connect(update_fake_progress)
@@ -253,6 +258,7 @@ class SeparatePage(QWidget):
             
             # Connect real completion signal to override fake progress if completed early
             def real_completion_handler(output_path):
+                self.separation_is_complete = True
                 self.fake_progress_timer.stop()
                 self.separation_complete(output_path)
             
@@ -273,10 +279,22 @@ class SeparatePage(QWidget):
             self.render_window.updateTimeRemaining("Done!")
             # Close render window after 1 second
             QTimer.singleShot(1000, self.render_window.close)
+
+        # Đánh dấu là đã hoàn thành
+        self.separation_is_complete = True
         
-        # Switch to output view
+        # Switch to output view and update with new separation results
         main_window = self.window()
         if main_window and hasattr(main_window, 'stack'):
+            # Lấy widget output (giả sử nó ở index 15)
+            output_widget = main_window.stack.widget(15)
+            
+            # Kiểm tra nếu là OutputSeparateWidget
+            if isinstance(output_widget, OutputSeparateWidget):
+                # Cập nhật thông tin cho widget
+                output_widget.update_audio_files(output_path, self.selected_file)
+            
+            # Chuyển đến trang output
             main_window.stack.setCurrentIndex(15)
 
     def separation_error(self, error_message):
