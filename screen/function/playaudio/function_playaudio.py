@@ -1,6 +1,6 @@
 import librosa
 import numpy as np
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QPropertyAnimation, QEasingCurve, QThread
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QUrl, QSize, QTimer, QPropertyAnimation, QEasingCurve, QThread, pyqtSignal
 from PyQt5.QtWidgets import (QLabel, QFileDialog, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QGridLayout, QSizePolicy)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
@@ -36,6 +36,7 @@ class AudioLoadWorker(QThread):
 
 class DropAreaLabel(QLabel):
     file_dropped = pyqtSignal(str)
+    time_updated = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -318,7 +319,9 @@ class DropAreaLabel(QLabel):
             if duration > 0:
                 progress = (position / duration) * 100
                 self.waveform.set_progress(progress)
-            self.current_time.setText(self.format_time(position))
+            time_str = self.format_time(position)
+            self.current_time.setText(time_str)
+            self.time_updated.emit(time_str)
 
 
     def position_changed(self, position):
