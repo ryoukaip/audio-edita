@@ -172,6 +172,9 @@ class SeparatePage(QWidget):
         layout.addWidget(main_widget)
         self.setLayout(layout)
 
+        first_button = self.button_group.buttons()[0]
+        first_button.setChecked(True)
+
     def show_output_widget(self):
         if not self.selected_file:
             from PyQt5.QtWidgets import QMessageBox
