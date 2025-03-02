@@ -21,12 +21,13 @@ class SplitPage(QWidget):
 
         # Main layout
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setContentsMargins(25, 15, 25, 25)
 
         # Add function bar
         top_bar = FunctionBar("split", font_family, self)
         layout.addLayout(top_bar)
-        
+        layout.addSpacing(10)
+
         # Audio player
         self.audio_player = DropAreaLabel()
         self.audio_player.setFixedHeight(220)  
@@ -34,6 +35,7 @@ class SplitPage(QWidget):
         self.audio_player.file_dropped.connect(self.on_file_dropped)
         self.audio_player.time_updated.connect(self.update_split_time)
         layout.addWidget(self.audio_player)
+        layout.addSpacing(10)
         
         # Thêm dòng chữ "split this audio at"
         split_label = QLabel("split this audio at")
@@ -161,7 +163,7 @@ class SplitPage(QWidget):
             sf.write(output_file1, part1, sr, format='WAV')
             sf.write(output_file2, part2, sr, format='WAV')
             print(f"Files exported successfully: {output_file1}, {output_file2}")
-
+            
         except Exception as e:
             print(f"Error during export: {e}")
 
