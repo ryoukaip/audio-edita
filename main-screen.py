@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from PyQt5.QtCore import Qt, QSize, QPoint
@@ -115,6 +116,9 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.set_active_button(button)
 
 if __name__ == "__main__":
+    current_dir = os.getcwd()
+    print(current_dir)
+    # os.system(current_dir + "/test.bat")
     app = QApplication(sys.argv)
     window = AudioEditorUI()
     window.show()
