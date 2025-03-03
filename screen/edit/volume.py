@@ -19,10 +19,7 @@ class VolumePage(QWidget):
     
     def initUI(self):
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
-        if font_id == -1:
-            font_family = "Arial"
-        else:
-            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
 
         layout = QVBoxLayout(self)
@@ -39,8 +36,8 @@ class VolumePage(QWidget):
         layout.addWidget(self.audio_player)
         layout.addSpacing(10)
 
-        self.volume_slider_widget = Slider(font_family)
-        self.volume_slider_widget.volume_changed.connect(self.handle_volume_change)
+        self.volume_slider_widget = Slider(font_family, mode="volume", min_value=0, max_value=200, default_value=100, unit="%")
+        self.volume_slider_widget.value_changed.connect(self.handle_volume_change)
         layout.addWidget(self.volume_slider_widget)
         layout.addSpacing(15)
 
@@ -144,20 +141,18 @@ class VolumePage(QWidget):
             self.fake_progress_timer.timeout.connect(update_fake_progress)
             self.fake_progress_timer.start(1000)
 
-            volume_factor = self.volume_slider_widget.get_volume_factor()
+            volume_factor = self.volume_slider_widget.get_processed_value()
             audio, sr = librosa.load(self.selected_audio_file, sr=None)
             adjusted_audio = audio * volume_factor
+
             if np.max(np.abs(adjusted_audio)) > 1.0:
                 adjusted_audio = adjusted_audio / np.max(np.abs(adjusted_audio))
-            
-            documents_path = os.path.join(os.path.expanduser("~"), "Documents")
-            output_dir = os.path.join(documents_path, "audio-edita", "edit")
+
+            output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "edit")
             os.makedirs(output_dir, exist_ok=True)
-            
             filename = os.path.splitext(os.path.basename(self.selected_audio_file))[0]
-            volume_percent = int(volume_factor * 100)
-            output_file = os.path.join(output_dir, f"{filename}_vol_{volume_percent}%.wav")
-            
+            output_file = os.path.join(output_dir, f"{filename}_vol_{int(volume_factor * 100)}%.wav")
+
             sf.write(output_file, adjusted_audio, sr)
             
             self.fake_progress_timer.stop()
@@ -175,7 +170,7 @@ class VolumePage(QWidget):
                 self.fake_progress_timer.stop()
             if hasattr(self, 'render_window'):
                 self.render_window.close()
-            noti_window = NotiWindow()  # Tạo mới, không cần parent
+            noti_window = NotiWindow() 
             noti_window.update_message(f"Export failed: {str(e)}")
             self.export_btn.setEnabled(True)
 
