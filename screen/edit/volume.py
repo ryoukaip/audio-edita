@@ -41,11 +41,6 @@ class VolumePage(QWidget):
         layout.addWidget(self.volume_slider_widget)
         layout.addSpacing(15)
 
-        self.status_label = QLabel("")
-        self.status_label.setStyleSheet("color: white;")
-        self.status_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.status_label)
-
         layout.addStretch()
 
         button_layout = QHBoxLayout()
@@ -92,7 +87,6 @@ class VolumePage(QWidget):
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
         self.selected_audio_file = file_path
-        self.status_label.setText("")
 
     def handle_volume_change(self, value):
         pass
@@ -162,7 +156,6 @@ class VolumePage(QWidget):
             QTimer.singleShot(1000, self.render_window.close)
             
             self.audio_player.set_audio_file(output_file)
-            self.status_label.setText(f"Exported: {os.path.basename(output_file)}")
             self.export_btn.setEnabled(True)
 
         except Exception as e:

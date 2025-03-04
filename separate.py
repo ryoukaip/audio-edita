@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt5.QtCore import Qt, QThread, QTimer
 from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.separate.function_separate import start_separation
+from screen.function.function_separate import start_separation
 from screen.function.system.function_renderwindow import RenderWindow
 from screen.function.output.output_separate import OutputSeparateWidget
 
