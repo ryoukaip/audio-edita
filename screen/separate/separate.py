@@ -4,6 +4,7 @@ import subprocess
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QButtonGroup, QStackedWidget, QApplication
 from PyQt5.QtCore import Qt, QThread, QTimer
 from PyQt5.QtGui import QFont, QFontDatabase
+from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.function_separate import start_separation
 from screen.function.system.function_renderwindow import RenderWindow
@@ -17,18 +18,22 @@ class SeparatePage(QWidget):
         self.selected_stems = 2  # Default value
     
     def initUI(self):
+        font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        self.setFont(QFont(font_family))
+
         # Create main widget to hold everything
         main_widget = QWidget()
         main_layout = QVBoxLayout(main_widget)
-        main_layout.setContentsMargins(25, 25, 25, 25)
+        main_layout.setContentsMargins(25, 15, 25, 25)
 
         # Content layout (everything except Export button)
         content_layout = QVBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
 
-        font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
-        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        self.setFont(QFont(font_family))
+        top_bar = FunctionBar("vocal separation", font_family, self)
+        main_layout.addLayout(top_bar)
+        main_layout.addSpacing(10)
 
         # Create container for drop area and columns with fixed spacing
         drop_columns_container = QWidget()
@@ -324,3 +329,9 @@ class SeparatePage(QWidget):
 
     def handle_stem_selection(self, button):
         self.selected_stems = int(button.text())
+    
+    def go_back(self):
+        main_window = self.window()
+        if main_window and hasattr(main_window, 'stack'):
+            stack = main_window.stack
+            stack.setCurrentIndex(1)

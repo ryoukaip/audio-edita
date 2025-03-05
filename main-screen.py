@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QPushButton, QVB
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from PyQt5.QtCore import Qt, QSize, QPoint
 
-from edit import EditPage
-from separate import SeparatePage
-from check import CheckPage
+from menu_edit import MenuEditPage
+from menu_separate import MenuSeparatePage
+from menu_check import MenuCheckPage
 
 from screen.edit.mixing import MixingPage
 from screen.edit.trim import TrimPage
@@ -19,6 +19,9 @@ from screen.edit.speed import SpeedPage
 from screen.edit.compress import CompressPage
 from screen.edit.convert import ConvertPage
 from screen.edit.voice import VoicePage
+
+from screen.separate.separate import SeparatePage
+from screen.separate.video2audio import Video2AudioPage
 
 from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
@@ -65,9 +68,9 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.buttonClicked.connect(self.handle_sidebar_button)
         
         self.stack = QStackedWidget()
-        self.stack.addWidget(EditPage())
-        self.stack.addWidget(SeparatePage())
-        self.stack.addWidget(CheckPage())
+        self.stack.addWidget(MenuEditPage())
+        self.stack.addWidget(MenuSeparatePage())
+        self.stack.addWidget(MenuCheckPage())
 
         self.stack.addWidget(MixingPage())
         self.stack.addWidget(TrimPage())
@@ -85,6 +88,8 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(CheckOfflinePage())
 
         self.stack.addWidget(OutputSeparateWidget())
+        self.stack.addWidget(SeparatePage())
+        self.stack.addWidget(Video2AudioPage())
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)

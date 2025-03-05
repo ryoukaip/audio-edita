@@ -46,7 +46,7 @@ class IconButton(QPushButton):
 
         self.setLayout(layout)
 
-class CheckPage(QWidget):
+class MenuCheckPage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
