@@ -1,0 +1,7 @@
+moviepy
+PyQt5
+requests
+librosa
+numpy
+spleeter
+soundfile

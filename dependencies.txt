@@ -1,0 +1,5 @@
+ffmpeg
+K-lite Codec Standard
+Python 3.11.x
+
+Cài đặt trong hệ thống chạy code
