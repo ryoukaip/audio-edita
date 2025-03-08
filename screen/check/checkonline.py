@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
+from PyQt5.QtGui import QFont, QFontDatabase, QIcon
+from PyQt5.QtCore import QSize
 from screen.function.mainscreen.function_functionbar import FunctionBar
+from screen.check.shazam import ShazamApp
 
 class CheckOnlinePage(QWidget):
     def __init__(self):
@@ -18,10 +20,13 @@ class CheckOnlinePage(QWidget):
         layout.setContentsMargins(12, 12, 12, 12)
 
         # Add function bar
-        top_bar = FunctionBar("check copyright online", font_family, self)
+        top_bar = FunctionBar("Check Copyright Online", font_family, self)
         layout.addLayout(top_bar)
-        layout.addStretch()
-        
+
+        # Integrate ShazamApp
+        self.shazam_app = ShazamApp()
+        layout.addWidget(self.shazam_app.centralWidget())
+
         self.setStyleSheet("background-color: #282a32;")
 
     def go_back(self):
@@ -29,3 +34,7 @@ class CheckOnlinePage(QWidget):
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(2)
+
+    def toggle_playback(self):
+        # Placeholder for the actual playback toggle functionality
+        pass

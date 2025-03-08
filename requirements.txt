@@ -2,6 +2,8 @@ moviepy
 PyQt5
 requests
 librosa
-numpy
+numpy==2.1
 spleeter
 soundfile
+scipy
+pydub
