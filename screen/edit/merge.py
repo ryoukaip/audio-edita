@@ -15,7 +15,7 @@ class MergePage(QWidget):
 
         # Main layout
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setContentsMargins(25, 15, 25, 25)
 
         # Add function bar
         top_bar = FunctionBar("merge", font_family, self)

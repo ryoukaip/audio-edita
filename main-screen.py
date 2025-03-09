@@ -30,6 +30,8 @@ from screen.function.output.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
 
+from welcome import WelcomeWindow
+
 class AudioEditorUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -121,10 +123,17 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.set_active_button(button)
 
 if __name__ == "__main__":
-    current_dir = os.getcwd()
-    print(current_dir)
-    # os.system(current_dir + "/test.bat")
     app = QApplication(sys.argv)
-    window = AudioEditorUI()
-    window.show()
+    
+    # Khởi tạo cả WelcomeWindow và AudioEditorUI
+    welcome = WelcomeWindow()
+    main_window = AudioEditorUI()
+    
+    # Kết nối tín hiệu closed của WelcomeWindow với việc hiển thị AudioEditorUI
+    welcome.closed.connect(main_window.show)
+    welcome.closed.connect(welcome.close)  # Đóng WelcomeWindow sau khi tín hiệu phát ra
+    
+    # Hiển thị WelcomeWindow trước
+    welcome.show()
+    
     sys.exit(app.exec_())
