@@ -20,7 +20,7 @@ class AudioLoadWorker(QThread):
             audio, sr = librosa.load(self.file_path, sr=22050, mono=True)
             
             # Giảm số lượng mẫu bằng cách lấy trung bình
-            target_samples = 1000
+            target_samples = 500
             samples_per_pixel = len(audio) // target_samples
             
             if samples_per_pixel > 1:
