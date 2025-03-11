@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run main-screen.py",
+            "name": "Run app.py",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/main-screen.py",
+            "program": "${workspaceFolder}/app.py",
             "console": "integratedTerminal"
         }
     ]
