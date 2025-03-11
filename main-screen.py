@@ -125,15 +125,34 @@ class AudioEditorUI(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    # Khởi tạo cả WelcomeWindow và AudioEditorUI
-    welcome = WelcomeWindow()
-    main_window = AudioEditorUI()
+    welcome_status_file = "./welcomeStatus.txt"
     
-    # Kết nối tín hiệu closed của WelcomeWindow với việc hiển thị AudioEditorUI
-    welcome.closed.connect(main_window.show)
-    welcome.closed.connect(welcome.close)  # Đóng WelcomeWindow sau khi tín hiệu phát ra
-    
-    # Hiển thị WelcomeWindow trước
-    welcome.show()
+    def read_welcome_status():
+        if os.path.exists(welcome_status_file):
+            with open(welcome_status_file, "r") as file:
+                return file.read().strip().lower() == "true"
+        return False
+
+    def write_welcome_status(status):
+        with open(welcome_status_file, "w") as file:
+            file.write("true" if status else "false")
+
+    if not read_welcome_status():
+        # Khởi tạo cả WelcomeWindow và AudioEditorUI
+        welcome = WelcomeWindow()
+        main_window = AudioEditorUI()
+        
+        # Kết nối tín hiệu closed của WelcomeWindow với việc hiển thị AudioEditorUI
+        welcome.closed.connect(main_window.show)
+        welcome.closed.connect(welcome.close)  # Đóng WelcomeWindow sau khi tín hiệu phát ra
+        
+        # Hiển thị WelcomeWindow trước
+        welcome.show()
+        
+        # Ghi trạng thái welcome là true
+        write_welcome_status(True)
+    else:
+        main_window = AudioEditorUI()
+        main_window.show()
     
     sys.exit(app.exec_())
