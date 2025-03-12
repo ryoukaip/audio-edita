@@ -282,7 +282,7 @@ class DropAreaLabel(QLabel):
             self,
             "Select Audio File",
             "",
-            "Audio Files (*.mp3 *.wav *.ogg *.m4a *.flac)"
+            "Audio Files (*.mp3 *.wav *.ogg *.m4a *.flac *.mp4)"
         )
         if file_path:
             self.set_audio_file(file_path)
@@ -349,7 +349,7 @@ class DropAreaLabel(QLabel):
 
     @staticmethod
     def _is_audio_file(file_path):
-        audio_extensions = {'.mp3', '.wav', '.ogg', '.m4a', '.flac'}
+        audio_extensions = {'.mp3', '.wav', '.ogg', '.m4a', '.flac', '.mp4'}
         return any(file_path.lower().endswith(ext) for ext in audio_extensions)
         
     def resizeEvent(self, event):

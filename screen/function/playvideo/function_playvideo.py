@@ -67,7 +67,10 @@ class DropAreaLabel(QLabel):
         self.video_widget = QVideoWidget()
         self.video_widget.setFixedSize(640, 360)  # 16:9 ratio
         self.video_widget.setStyleSheet("background-color: black;")
+        self.video_widget.update()
+        self.video_widget.repaint()
         self.player.setVideoOutput(self.video_widget)  # Gắn QMediaPlayer với QVideoWidget
+        self.player.mediaStatusChanged.connect(self.handle_media_status)
 
         # Thanh điều khiển
         lower_widget = QWidget()
@@ -205,6 +208,12 @@ class DropAreaLabel(QLabel):
         if file_path:
             self.set_audio_file(file_path)
             self.file_dropped.emit(file_path)
+
+    def handle_media_status(self, status):
+        if status == QMediaPlayer.EndOfMedia:
+            self.player.stop()  # Dừng phát
+            self.is_playing = False
+            self.play_btn.setIcon(self.play_icon)
 
     @staticmethod
     def _is_media_file(file_path):
