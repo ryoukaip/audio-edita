@@ -49,12 +49,16 @@ class DropAreaLabel(QLabel):
         if self.loading_worker and self.loading_worker.isRunning():
             self.loading_worker.terminate()
             self.loading_worker.wait()
+            self.loading_worker = None
         
         # Reset player an toàn
         self.player.stop()
         self.player.setMedia(QMediaContent())
         self.player.blockSignals(True)
-        QTimer.singleShot(100, self._clear_temp_file)
+        
+        # Xử lý file tạm trước khi tạo file mới
+        if self.temp_audio_file:
+            QTimer.singleShot(100, self._clear_temp_file)
         
         self.original_file_path = file_path
         self.seekbar.setEnabled(False)
@@ -63,20 +67,30 @@ class DropAreaLabel(QLabel):
         if self.first_load:
             self.loading_overlay.show_loading()
         
-        if is_audio_file(file_path):
-            self.loading_worker = AudioLoadWorker(file_path)
-            self.loading_worker.finished.connect(self.on_audio_loaded)
-            self.loading_worker.start()
-        elif is_video_file(file_path):
-            self.loading_worker = VideoLoadWorker(file_path)
-            self.loading_worker.finished.connect(self.on_video_audio_loaded)
-            self.loading_worker.start()
-        else:
-            print(f"Unsupported file format: {file_path}")
+        try:
+            if is_audio_file(file_path):
+                self.loading_worker = AudioLoadWorker(file_path)
+                self.loading_worker.finished.connect(self.on_audio_loaded)
+                self.loading_worker.start()
+                # Bật nút tua cho file âm thanh
+                self.back_btn.setEnabled(True)
+                self.forward_btn.setEnabled(True)
+            elif is_video_file(file_path):
+                self.loading_worker = VideoLoadWorker(file_path)
+                self.loading_worker.finished.connect(self.on_video_audio_loaded)
+                self.loading_worker.start()
+                # Vô hiệu hóa nút tua cho video
+                self.back_btn.setEnabled(False)
+                self.forward_btn.setEnabled(False)
+            else:
+                print(f"Unsupported file format: {file_path}")
+                self.loading_overlay.hide_loading()
+                self.setText("Unsupported file format")
+                return
+        except Exception as e:
+            print(f"Error starting worker: {e}")
             self.loading_overlay.hide_loading()
-            self.setText("Unsupported file format")
-            return
-        
+            
         self.player.blockSignals(False)
 
     def _clear_temp_file(self):
@@ -89,7 +103,6 @@ class DropAreaLabel(QLabel):
             self.temp_audio_file = None
 
     def on_audio_loaded(self, file_path, data):
-        print(f"on_audio_loaded: file_path={file_path}, data={data}")
         if data:
             waveform_data, sr = data
             self.waveform.set_waveform_data(waveform_data)
@@ -101,7 +114,6 @@ class DropAreaLabel(QLabel):
         self.file_dropped.emit(self.original_file_path)
 
     def on_video_audio_loaded(self, temp_audio_path, data, duration_ms):
-        print(f"on_video_audio_loaded: temp_audio_path={temp_audio_path}, data={data}, duration_ms={duration_ms}")
         if temp_audio_path:
             self.temp_audio_file = temp_audio_path
             self.temp_file_updated.emit(temp_audio_path)  # Báo cho Video2AudioPage
