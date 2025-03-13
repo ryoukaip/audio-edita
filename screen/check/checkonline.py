@@ -223,10 +223,10 @@ class CheckOnlinePage(QWidget):
         self.progress_bar.hide()
         self.analyze_button.setEnabled(True)
         self.audio_player.setText(f"Error: {error_message}")
-        self.title_label.setText("unknown title")
-        self.artist_label.setText("unknown artist")
-        self.album_label.setText("unknown album")
-        self.year_label.setText("unknown year")
+        self.title_label.setText("no matching result")
+        self.artist_label.setText("???")
+        self.album_label.setText("???")
+        self.year_label.setText("???")
         self.album_art_label.setPixmap(QPixmap())
 
 if __name__ == "__main__":
