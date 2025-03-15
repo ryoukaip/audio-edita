@@ -45,7 +45,7 @@ class SpeedWorker(QThread):
             self.progress_updated.emit(fake_progress_steps[2][0], fake_progress_steps[2][1], fake_progress_steps[2][2])
 
             # Tạo thư mục đầu ra và lưu file
-            output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "edit")
+            output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "edit", "speed")
             os.makedirs(output_dir, exist_ok=True)
             filename = os.path.splitext(os.path.basename(self.input_file))[0]
             output_file = os.path.join(output_dir, f"{filename}_speed_{int(self.speed_factor * 100)}%.wav")
@@ -191,7 +191,7 @@ class SpeedPage(QWidget):
 
     def open_file_location(self):
         documents_path = os.path.join(os.path.expanduser("~"), "Documents")
-        output_dir = os.path.join(documents_path, "audio-edita", "edit")
+        output_dir = os.path.join(documents_path, "audio-edita", "edit", "speed")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         QDesktopServices.openUrl(QUrl.fromLocalFile(output_dir))

@@ -149,7 +149,7 @@ class Video2AudioPage(QWidget):
             logging.debug("Audio paused before export")
 
         # Tạo đường dẫn đầu ra
-        output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "separate")
+        output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "separate", "video-to-audio")
         os.makedirs(output_dir, exist_ok=True)
         base_name = os.path.splitext(os.path.basename(self.selected_video_file))[0]
         output_file = os.path.join(output_dir, f"{base_name}_audio.mp3")
@@ -194,7 +194,7 @@ class Video2AudioPage(QWidget):
         self.export_btn.setEnabled(True)
 
     def open_file_location(self):
-        output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "separate")
+        output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "separate", "video-to-audio")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         QDesktopServices.openUrl(QUrl.fromLocalFile(output_dir))
