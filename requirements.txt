@@ -7,3 +7,4 @@ spleeter
 soundfile
 scipy
 pydub
+pyacoustid

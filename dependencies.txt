@@ -1,5 +1,6 @@
 ffmpeg
 K-lite Codec Standard
 Python 3.11.x
+Chromaprint fpcalc (Add vào PATH, https://acoustid.org/chromaprint)
 
 Cài đặt trong hệ thống chạy code
