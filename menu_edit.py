@@ -81,7 +81,7 @@ class MenuEditPage(QWidget):
         grid.setSpacing(15)
 
         buttons = [
-            ("mixing", "./icon/mix.png"), ("trim", "./icon/trim.png"), 
+            ("equalizer", "./icon/equalizer.png"), ("trim", "./icon/trim.png"), 
             ("merge", "./icon/merge.png"), ("split", "./icon/split.png"),
             ("volume", "./icon/volume.png"), ("reverse", "./icon/reverse.png"), 
             ("speed", "./icon/speed.png"), ("compress", "./icon/compress.png"),
@@ -93,8 +93,8 @@ class MenuEditPage(QWidget):
             btn = IconButton(icon_path, text)
             if text == "trim":
                 btn.clicked.connect(self.show_trim_page)
-            elif text == "mixing":
-                btn.clicked.connect(self.show_mixing_page)
+            elif text == "equalizer":
+                btn.clicked.connect(self.show_equalizer_page)
             elif text == "merge":
                 btn.clicked.connect(self.show_merge_page)
             elif text == "split":
@@ -119,7 +119,7 @@ class MenuEditPage(QWidget):
         layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_mixing_page(self):
+    def show_equalizer_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack

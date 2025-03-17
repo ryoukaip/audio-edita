@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QSize, QPoint
 from menu_edit import MenuEditPage
 from menu_separate import MenuSeparatePage
 from menu_check import MenuCheckPage
-from screen.edit.mixing import MixingPage
+from screen.edit.equalizer import EqualizerPage
 from screen.edit.trim import TrimPage
 from screen.edit.merge import MergePage
 from screen.edit.split import SplitPage
@@ -65,7 +65,7 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(MenuEditPage())
         self.stack.addWidget(MenuSeparatePage())
         self.stack.addWidget(MenuCheckPage())
-        self.stack.addWidget(MixingPage())
+        self.stack.addWidget(EqualizerPage())
         self.stack.addWidget(TrimPage())
         self.stack.addWidget(MergePage())
         self.stack.addWidget(SplitPage())
