@@ -6,9 +6,9 @@ from PyQt5.QtCore import Qt, QThread, QTimer
 from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.function_separate import start_separation
+from screen.separate.worker_separate import start_separation
 from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.output.output_separate import OutputSeparateWidget
+from screen.separate.output_separate import OutputSeparateWidget
 
 class SeparatePage(QWidget):
     def __init__(self):

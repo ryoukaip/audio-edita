@@ -21,7 +21,7 @@ from screen.separate.separate import SeparatePage
 from screen.separate.video2audio import Video2AudioPage
 from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
-from screen.function.output.output_separate import OutputSeparateWidget
+from screen.separate.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
 

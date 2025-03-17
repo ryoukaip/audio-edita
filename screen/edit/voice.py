@@ -4,7 +4,7 @@ from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
 from PyQt5.QtCore import Qt, QUrl, QTimer
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.function_voice import VoiceWorker
+from screen.edit.worker_voice import VoiceWorker
 from screen.function.system.function_renderwindow import RenderWindow
 from screen.function.system.function_notiwindow import NotiWindow
 
@@ -102,7 +102,7 @@ class VoicePage(QWidget):
             return
 
         # Hiển thị cửa sổ render
-        self.render_window = RenderWindow(self)
+        self.render_window = RenderWindow(None)
         self.render_window.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         screen_geometry = QApplication.desktop().screenGeometry()
         window_geometry = self.render_window.geometry()

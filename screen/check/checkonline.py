@@ -1,11 +1,11 @@
 import sys
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QSizePolicy, QGridLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon, QPixmap, QPainter, QBrush, QColor
-from PyQt5.QtCore import Qt, QSize
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.system.function_marqueelabel import MarqueeLabel
-from screen.check.shazam import ShazamApp
+from screen.check.worker_shazam import ShazamApp
 
 class RoundedPhotoLabel(QLabel):
     def __init__(self):
@@ -65,7 +65,7 @@ class CheckOnlinePage(QWidget):
         layout.setContentsMargins(25, 15, 25, 25)
 
         # Add function bar
-        top_bar = FunctionBar("Check Copyright Online", font_family, self)
+        top_bar = FunctionBar("check copyright online", font_family, self)
         layout.addLayout(top_bar)
 
         # Results area
