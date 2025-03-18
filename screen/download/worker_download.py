@@ -4,43 +4,75 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from yt_dlp import YoutubeDL
 
 class URLValidator:
-    """Lớp kiểm tra tính hợp lệ của URL YouTube và TikTok"""
+    """Lớp kiểm tra tính hợp lệ của URL từ nhiều nền tảng"""
     def __init__(self):
-        # Các mẫu regex cho URL YouTube và TikTok
         self.patterns = {
             'youtube': [
-                r'^(https?://)?(?:www\.)?youtube\.com/watch\?v=[\w-]{11}',  # YouTube video
-                r'^(https?://)?youtu\.be/[\w-]{11}',  # YouTube short link
-                r'^(https?://)?(?:www\.)?youtube\.com/shorts/[\w-]{11}',  # YouTube Shorts
-                r'^(https?://)?m\.youtube\.com/watch\?v=[\w-]{11}',  # YouTube mobile
-                r'^(https?://)?(?:www\.)?youtube\.com/playlist\?list=[\w-]{34}',  # YouTube playlist (không hỗ trợ)
+                r'^(https?://)?(?:www\.)?youtube\.com/watch\?v=[\w-]{11}',
+                r'^(https?://)?youtu\.be/[\w-]{11}',
+                r'^(https?://)?(?:www\.)?youtube\.com/shorts/[\w-]{11}',
+                r'^(https?://)?m\.youtube\.com/watch\?v=[\w-]{11}',
             ],
             'tiktok': [
-                r'^(https?://)?(?:www\.)?tiktok\.com/@[\w.-]+/video/\d+',  # TikTok video (tiktok.com/@username/video/id)
-                r'^(https?://)?vm\.tiktok\.com/[\w-]+/?$',  # TikTok short link (vm.tiktok.com/...)
-                r'^(https?://)?m\.tiktok\.com/v/\d+\.html',  # TikTok mobile link
-            ]
+                r'^(https?://)?(?:www\.)?tiktok\.com/@[\w.-]+/video/\d+',
+                r'^(https?://)?vm\.tiktok\.com/[\w-]+/?$',
+                r'^(https?://)?m\.tiktok\.com/v/\d+\.html',
+            ],
+            'facebook': [
+                r'^(https?://)?(?:www\.)?facebook\.com/.*/videos/\d+',
+                r'^(https?://)?(?:www\.)?fb\.watch/[\w-]+/?$',
+                r'^(https?://)?m\.facebook\.com/.*/videos/\d+',
+                r'^(https?://)?(?:www\.)?facebook\.com/share/r/[\w-]+/?$',
+                r'^(https?://)?(?:www\.)?facebook\.com/watch\?v=\d+(?:&[\w=]+)*',
+            ],
+            'instagram': [
+                r'^(https?://)?(?:www\.)?instagram\.com/(p|reel)/[\w-]+/?$',
+                r'^(https?://)?(?:www\.)?instagram\.com/stories/[\w.-]+/\d+/?$',
+                r'^(https?://)?(?:www\.)?instagram\.com/(p|reel)/[\w-]+/?\?[\w=&%_-]+',
+            ],
+            'x': [
+                r'^(https?://)?(?:www\.)?(twitter|x)\.com/.*/status/\d+',
+            ],
+            'soundcloud': [
+                r'^(https?://)?(?:www\.)?soundcloud\.com/[\w-]+/[\w-]+',
+                r'^(https?://)?soundcloud\.app\.goo\.gl/[\w-]+',
+            ],
+            'bandcamp': [
+                r'^(https?://)?[\w-]+\.bandcamp\.com/track/[\w-]+',
+                r'^(https?://)?[\w-]+\.bandcamp\.com/album/[\w-]+',  # Album (chỉ tải track đầu tiên nếu không hỗ trợ đầy đủ)
+            ],
+            'deezer': [
+                r'^(https?://)?(?:www\.)?deezer\.com/.*/track/\d+',
+                r'^(https?://)?deezer\.page\.link/[\w-]+',
+                r'^(https?://)?(?:www\.)?deezer\.com/album/\d+',
+                r'^(https?://)?(?:www\.)?deezer\.com/artist/\d+',
+                r'^(https?://)?(?:www\.)?deezer\.com/playlist/\d+',
+                r'^(https?://)?(?:www\.)?deezer\.com/track/\d+',
+                r'^(https?://)?dzr\.page\.link/[\w-]+',
+            ],
+            'tidal': [
+                r'^(https?://)?(?:www\.)?tidal\.com/(browse/)?track/\d+',
+                r'^(https?://)?tidal\.lnk\.to/[\w-]+',
+            ],
+            'mixcloud': [
+                r'^(https?://)?(?:www\.)?mixcloud\.com/[\w-]+/[\w-]+/?$',
+                r'^(https?://)?(?:www\.)?mixcloud\.com/[^/]+/[^/]+/?$',
+            ],
         }
 
     def is_valid_url(self, url):
-        """Kiểm tra xem URL có hợp lệ không và thuộc loại nào"""
+        """Kiểm tra URL hợp lệ và thuộc nền tảng nào"""
         if not url:
             return False, "URL is empty", None
         
-        # Chuẩn hóa URL
         normalized_url = self.normalize_url(url.strip())
 
-        # Kiểm tra YouTube
-        for pattern in self.patterns['youtube']:
-            if re.match(pattern, normalized_url):
-                if "playlist" in normalized_url:
-                    return False, "YouTube playlists are not supported yet", 'youtube'
-                return True, "Valid YouTube URL", 'youtube'
-
-        # Kiểm tra TikTok
-        for pattern in self.patterns['tiktok']:
-            if re.match(pattern, normalized_url):
-                return True, "Valid TikTok URL", 'tiktok'
+        for platform, patterns in self.patterns.items():
+            for pattern in patterns:
+                if re.match(pattern, normalized_url):
+                    if platform == 'youtube' and "playlist" in normalized_url:
+                        return False, "YouTube playlists are not supported yet", 'youtube'
+                    return True, f"Valid {platform.capitalize()} URL", platform
         
         return False, "Invalid URL or unsupported format", None
 
@@ -59,10 +91,8 @@ class DownloadWorker(QThread):
         super().__init__()
         self.url = url
         self.validator = URLValidator()
-        
-        # Xác định thư mục lưu trữ dựa trên loại URL
         self.base_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "download")
-        self.output_dir = None  # Sẽ được xác định sau khi kiểm tra URL
+        self.output_dir = None
 
     def run(self):
         """Hàm chạy trong luồng riêng để tải audio"""
@@ -72,13 +102,13 @@ class DownloadWorker(QThread):
             self.error.emit(message)
             return
 
-        # Xác định thư mục lưu trữ dựa trên platform
+        # Xác định thư mục lưu trữ
         self.output_dir = os.path.join(self.base_dir, platform)
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
         try:
-            # Cấu hình tải xuống chung cho cả YouTube và TikTok
+            # Cấu hình cơ bản cho yt-dlp
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(self.output_dir, '%(title)s.%(ext)s'),
@@ -88,7 +118,13 @@ class DownloadWorker(QThread):
                     'preferredquality': '192',
                 }],
                 'progress_hooks': [self.progress_hook],
+                'quiet': True,  # Giảm log
             }
+
+            if platform == 'deezer' or platform == 'tidal':
+                ydl_opts['format'] = 'bestaudio'  # Đảm bảo chỉ lấy audio tốt nhất
+            elif platform == 'bandcamp':
+                ydl_opts['outtmpl'] = os.path.join(self.output_dir, '%(album)s - %(title)s.%(ext)s')  # Định dạng tên file đặc biệt
 
             with YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(self.url, download=True)

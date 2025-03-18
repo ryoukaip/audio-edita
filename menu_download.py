@@ -107,6 +107,8 @@ class MenuDownloadPage(QWidget):
                 btn.clicked.connect(self.show_bandcamp_page)
             elif text == "deezer":
                 btn.clicked.connect(self.show_deezer_page)
+            elif text == "tidal":
+                btn.clicked.connect(self.show_tidal_page)
             elif text == "mixcloud":
                 btn.clicked.connect(self.show_mixcloud_page)
             grid.addWidget(btn, *pos)
@@ -164,9 +166,15 @@ class MenuDownloadPage(QWidget):
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(26)
+
+    def show_tidal_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(27) 
     
     def show_mixcloud_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(27)        
+            stack.setCurrentIndex(28)        

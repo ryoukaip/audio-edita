@@ -24,6 +24,14 @@ from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
 from screen.download.youtube import YoutubeDownloadPage
 from screen.download.tiktok import TiktokDownloadPage
+from screen.download.facebook import FacebookDownloadPage
+from screen.download.instagram import InstagramDownloadPage
+from screen.download.x import XDownloadPage
+from screen.download.soundcloud import SoundcloudDownloadPage
+from screen.download.bandcamp import BandcampDownloadPage
+from screen.download.deezer import DeezerDownloadPage
+from screen.download.tidal import TidalDownloadPage
+from screen.download.mixcloud import MixcloudDownloadPage
 from screen.separate.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
@@ -86,6 +94,14 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(Video2AudioPage())
         self.stack.addWidget(YoutubeDownloadPage())
         self.stack.addWidget(TiktokDownloadPage())
+        self.stack.addWidget(FacebookDownloadPage())
+        self.stack.addWidget(InstagramDownloadPage())
+        self.stack.addWidget(XDownloadPage())
+        self.stack.addWidget(SoundcloudDownloadPage())
+        self.stack.addWidget(BandcampDownloadPage())
+        self.stack.addWidget(DeezerDownloadPage())
+        self.stack.addWidget(TidalDownloadPage())
+        self.stack.addWidget(MixcloudDownloadPage())
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)
