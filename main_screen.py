@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QSize, QPoint
 from menu_edit import MenuEditPage
 from menu_separate import MenuSeparatePage
 from menu_check import MenuCheckPage
+from menu_download import MenuDownloadPage
 from screen.edit.equalizer import EqualizerPage
 from screen.edit.trim import TrimPage
 from screen.edit.merge import MergePage
@@ -21,6 +22,8 @@ from screen.separate.separate import SeparatePage
 from screen.separate.video2audio import Video2AudioPage
 from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
+from screen.download.youtube import YoutubeDownloadPage
+from screen.download.tiktok import TiktokDownloadPage
 from screen.separate.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
@@ -65,6 +68,7 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(MenuEditPage())
         self.stack.addWidget(MenuSeparatePage())
         self.stack.addWidget(MenuCheckPage())
+        self.stack.addWidget(MenuDownloadPage())
         self.stack.addWidget(EqualizerPage())
         self.stack.addWidget(TrimPage())
         self.stack.addWidget(MergePage())
@@ -80,6 +84,8 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(OutputSeparateWidget())
         self.stack.addWidget(SeparatePage())
         self.stack.addWidget(Video2AudioPage())
+        self.stack.addWidget(YoutubeDownloadPage())
+        self.stack.addWidget(TiktokDownloadPage())
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)
@@ -112,5 +118,12 @@ class AudioEditorUI(QMainWindow):
         self.title_bar.toggleMaximize()
 
     def handle_sidebar_button(self, index, button):
-        self.stack.setCurrentIndex(index)
+        if button == self.sidebar.edit_btn:
+            self.stack.setCurrentIndex(0)  # MenuEditPage
+        elif button == self.sidebar.separate_btn:
+            self.stack.setCurrentIndex(1)  # MenuSeparatePage
+        elif button == self.sidebar.check_btn:
+            self.stack.setCurrentIndex(2)  # MenuCheckPage
+        elif button == self.sidebar.download_btn:
+            self.stack.setCurrentIndex(3)  # MenuDownloadPage
         self.sidebar.set_active_button(button)

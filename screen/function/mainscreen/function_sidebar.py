@@ -23,9 +23,11 @@ class CustomSidebar(QWidget):
         self.separate_btn.setIcon(QIcon("./icon/trim.png"))
         self.check_btn = QPushButton(" Check")
         self.check_btn.setIcon(QIcon("./icon/check.png"))
+        self.download_btn = QPushButton(" Download")
+        self.download_btn.setIcon(QIcon("./icon/download.png"))
 
         # Style and setup buttons
-        for index, btn in enumerate([self.edit_btn, self.separate_btn, self.check_btn]):
+        for index, btn in enumerate([self.edit_btn, self.separate_btn, self.check_btn, self.download_btn]):
             btn.setStyleSheet("""
                 QPushButton {
                     background-color: #1c1b1f;

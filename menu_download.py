@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Đặt kích thước cố định cho nút
         self.setFixedSize(110, 80)  # Đặt kích thước tối đa cố định
 
         # Load font Cabin-Bold
@@ -45,8 +46,7 @@ class IconButton(QPushButton):
 
         self.setLayout(layout)
 
-
-class MenuEditPage(QWidget):
+class MenuDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -61,7 +61,7 @@ class MenuEditPage(QWidget):
         layout.setContentsMargins(12, 50, 12, 12)
         layout.setSpacing(15)
         
-        title = QLabel("audio editing")
+        title = QLabel("download audio")
         title.setFont(QFont(font_family, 16))
         title.setAlignment(Qt.AlignCenter)
         subtitle = QLabel("choose a function to start")
@@ -81,100 +81,32 @@ class MenuEditPage(QWidget):
         grid.setSpacing(15)
 
         buttons = [
-            ("equalizer", "./icon/equalizer.png"), ("trim", "./icon/trim.png"), 
-            ("merge", "./icon/merge.png"), ("split", "./icon/split.png"),
-            ("volume", "./icon/volume.png"), ("reverse", "./icon/reverse.png"), 
-            ("speed", "./icon/speed.png"), ("compress", "./icon/compress.png"),
-            ("convert", "./icon/convert.png"), ("voice", "./icon/voice.png")
+            ("youtube", "./icon/video.png"), ("tiktok", "./icon/tiktok.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
-            if text == "trim":
-                btn.clicked.connect(self.show_trim_page)
-            elif text == "equalizer":
-                btn.clicked.connect(self.show_equalizer_page)
-            elif text == "merge":
-                btn.clicked.connect(self.show_merge_page)
-            elif text == "split":
-                btn.clicked.connect(self.show_split_page)
-            elif text == "volume":
-                btn.clicked.connect(self.show_volume_page)
-            elif text == "reverse":
-                btn.clicked.connect(self.show_reverse_page)
-            elif text == "speed":
-                btn.clicked.connect(self.show_speed_page)
-            elif text == "compress":
-                btn.clicked.connect(self.show_compress_page)
-            elif text == "convert":
-                btn.clicked.connect(self.show_convert_page)
-            elif text == "voice":
-                btn.clicked.connect(self.show_voice_page)
+            if text == "youtube":
+                btn.clicked.connect(self.show_youtube_page)
+            elif text == "tiktok":
+                btn.clicked.connect(self.show_tiktok_page)
             grid.addWidget(btn, *pos)
+        
+        container.setFixedWidth(300)
 
-        container.setFixedWidth(650)
-      
         layout.addLayout(title_subtitle_layout)
-        layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
+        layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_equalizer_page(self):
+    def show_youtube_page (self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(4)
+            stack.setCurrentIndex(19)
 
-    def show_trim_page(self):
+    def show_tiktok_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(5)
-
-    def show_merge_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(6)
-
-    def show_split_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(7)
-
-    def show_volume_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(8)
-
-    def show_reverse_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(9)
-
-    def show_speed_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(10)
-
-    def show_compress_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(11)
-
-    def show_convert_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(12)
-
-    def show_voice_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(13)
+            stack.setCurrentIndex(20)

@@ -103,10 +103,10 @@ class MenuCheckPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(13)
+            stack.setCurrentIndex(14)
 
     def show_offline_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(14)
+            stack.setCurrentIndex(15)

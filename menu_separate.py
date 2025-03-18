@@ -103,10 +103,10 @@ class MenuSeparatePage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(16)
+            stack.setCurrentIndex(17)
 
     def show_video_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(17)
+            stack.setCurrentIndex(18)
