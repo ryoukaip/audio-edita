@@ -3,7 +3,8 @@ from PyQt5.QtCore import Qt, QUrl, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QPixmap
 from screen.function.mainscreen.function_functionbar import FunctionBar
-from screen.edit.worker_compress import CompressWorker  
+from screen.download.function_downloadui import DownloadUI
+from screen.download.worker_download import DownloadWorker
 
 class TiktokDownloadPage(QWidget):
     def __init__(self):
@@ -23,7 +24,12 @@ class TiktokDownloadPage(QWidget):
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        layout.addStretch()
+        # Tạo giao diện tải với placeholder tùy chỉnh
+        self.download_ui = DownloadUI(placeholder_text="tiktok.com/@sofujinia_mori")
+        layout.addWidget(self.download_ui)
+
+        # Kết nối nút download với hàm xử lý
+        self.download_ui.download_btn.clicked.connect(self.download_tiktok_audio)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -45,7 +51,30 @@ class TiktokDownloadPage(QWidget):
         button_layout.addWidget(self.open_location_btn)
 
         layout.addLayout(button_layout)
-        self.setStyleSheet("background-color: #282a32;")
+    
+    def download_tiktok_audio(self):
+        tiktok_link = self.download_ui.link_input.text()
+        if tiktok_link:
+            # Thêm mục tải vào danh sách
+            name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+
+            # Tạo và chạy worker thread
+            self.worker = DownloadWorker(tiktok_link)
+            self.worker.progress.connect(lambda value: progress_bar.setValue(value))
+            self.worker.finished.connect(
+                lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
+            )
+            self.worker.error.connect(
+                lambda err: self.on_download_error(err, main_layout.parentWidget())
+            )
+            self.worker.start()
+        else:
+            print("Please enter a Tiktok link")
+
+    def on_download_error(self, error_message, file_widget):
+        """Xử lý khi có lỗi tải"""
+        print(f"Download error: {error_message}")
+        self.download_ui.remove_download_item(file_widget)
 
     def open_file_location(self):
         documents_path = os.path.join(os.path.expanduser("~"), "Documents")

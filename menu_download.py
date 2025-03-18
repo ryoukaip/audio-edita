@@ -82,6 +82,10 @@ class MenuDownloadPage(QWidget):
 
         buttons = [
             ("youtube", "./icon/video.png"), ("tiktok", "./icon/tiktok.png"),
+            ("facebook", "./icon/facebook.png"), ("instagram", "./icon/instagram.png"),
+            ("x", "./icon/x.png"), ("soundcloud", "./icon/soundcloud.png"),
+            ("bandcamp", "./icon/bandcamp.png"), ("deezer", "./icon/deezer.png"),
+            ("tidal", "./icon/tidal.png"), ("mixcloud", "./icon/mixcloud.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
@@ -91,9 +95,23 @@ class MenuDownloadPage(QWidget):
                 btn.clicked.connect(self.show_youtube_page)
             elif text == "tiktok":
                 btn.clicked.connect(self.show_tiktok_page)
+            elif text == "facebook":
+                btn.clicked.connect(self.show_facebook_page)
+            elif text == "instagram":
+                btn.clicked.connect(self.show_instagram_page)
+            elif text == "x":
+                btn.clicked.connect(self.show_x_page)
+            elif text == "soundcloud":
+                btn.clicked.connect(self.show_soundcloud_page)
+            elif text == "bandcamp":
+                btn.clicked.connect(self.show_bandcamp_page)
+            elif text == "deezer":
+                btn.clicked.connect(self.show_deezer_page)
+            elif text == "mixcloud":
+                btn.clicked.connect(self.show_mixcloud_page)
             grid.addWidget(btn, *pos)
         
-        container.setFixedWidth(300)
+        container.setFixedWidth(650)
 
         layout.addLayout(title_subtitle_layout)
         layout.addWidget(container, alignment=Qt.AlignCenter)
@@ -110,3 +128,45 @@ class MenuDownloadPage(QWidget):
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(20)
+
+    def show_facebook_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(21)
+
+    def show_instagram_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(22)
+    
+    def show_x_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(23)
+
+    def show_soundcloud_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(24)
+
+    def show_bandcamp_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(25)
+    
+    def show_deezer_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(26)
+    
+    def show_mixcloud_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            stack.setCurrentIndex(27)        
