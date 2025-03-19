@@ -12,6 +12,9 @@ class URLValidator:
                 r'^(https?://)?youtu\.be/[\w-]{11}',
                 r'^(https?://)?(?:www\.)?youtube\.com/shorts/[\w-]{11}',
                 r'^(https?://)?m\.youtube\.com/watch\?v=[\w-]{11}',
+                r'^(https?://)?(?:www\.)?music\.youtube\.com/watch\?v=[\w-]{11}',
+                r'^(https?://)?music\.youtube\.com/playlist\?list=[\w-]+',
+                r'^(https?://)?(?:www\.)?music\.youtube\.com/watch\?v=[\w-]{11}(?:&[\w=-]+)+',
             ],
             'tiktok': [
                 r'^(https?://)?(?:www\.)?tiktok\.com/@[\w.-]+/video/\d+',

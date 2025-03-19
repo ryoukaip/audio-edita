@@ -55,22 +55,27 @@ class XDownloadPage(QWidget):
 
     def download_x_audio(self):
         x_link = self.download_ui.link_input.text()
-        if x_link:
-            # Thêm mục tải vào danh sách
-            name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
-
-            # Tạo và chạy worker thread
-            self.worker = DownloadWorker(x_link)
-            self.worker.progress.connect(lambda value: progress_bar.setValue(value))
-            self.worker.finished.connect(
-                lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
-            )
-            self.worker.error.connect(
-                lambda err: self.on_download_error(err, main_layout.parentWidget())
-            )
-            self.worker.start()
-        else:
+        if not x_link:
             print("Please enter a X link")
+            return
+
+        # Kiểm tra URL trước khi tải
+        is_valid, message, platform = self.validator.is_valid_url(x_link)
+        if not is_valid or platform != 'x':
+            print(f"Error: {message if not is_valid else 'This is not a valid X URL'}")
+            return
+
+        # Nếu URL hợp lệ và là Tiktok, tiến hành tải
+        name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        self.worker = DownloadWorker(x_link)
+        self.worker.progress.connect(lambda value: progress_bar.setValue(value))
+        self.worker.finished.connect(
+            lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
+        )
+        self.worker.error.connect(
+            lambda err: self.on_download_error(err, main_layout.parentWidget())
+        )
+        self.worker.start()
 
     def on_download_error(self, error_message, file_widget):
         """Xử lý khi có lỗi tải"""

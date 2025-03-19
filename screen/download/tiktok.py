@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBo
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QPixmap
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.download.function_downloadui import DownloadUI
-from screen.download.worker_download import DownloadWorker
+from screen.download.worker_download import DownloadWorker, URLValidator
 
 class TiktokDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
+        self.validator = URLValidator()
         self.initUI()
     
     def initUI(self):
@@ -54,22 +55,27 @@ class TiktokDownloadPage(QWidget):
     
     def download_tiktok_audio(self):
         tiktok_link = self.download_ui.link_input.text()
-        if tiktok_link:
-            # Thêm mục tải vào danh sách
-            name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        if not tiktok_link:
+            print("Please enter a TikTok link")
+            return
 
-            # Tạo và chạy worker thread
-            self.worker = DownloadWorker(tiktok_link)
-            self.worker.progress.connect(lambda value: progress_bar.setValue(value))
-            self.worker.finished.connect(
-                lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
-            )
-            self.worker.error.connect(
-                lambda err: self.on_download_error(err, main_layout.parentWidget())
-            )
-            self.worker.start()
-        else:
-            print("Please enter a Tiktok link")
+        # Kiểm tra URL trước khi tải
+        is_valid, message, platform = self.validator.is_valid_url(tiktok_link)
+        if not is_valid or platform != 'tiktok':
+            print(f"Error: {message if not is_valid else 'This is not a valid TikTok URL'}")
+            return
+
+        # Nếu URL hợp lệ và là Tiktok, tiến hành tải
+        name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        self.worker = DownloadWorker(tiktok_link)
+        self.worker.progress.connect(lambda value: progress_bar.setValue(value))
+        self.worker.finished.connect(
+            lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
+        )
+        self.worker.error.connect(
+            lambda err: self.on_download_error(err, main_layout.parentWidget())
+        )
+        self.worker.start()
 
     def on_download_error(self, error_message, file_widget):
         """Xử lý khi có lỗi tải"""

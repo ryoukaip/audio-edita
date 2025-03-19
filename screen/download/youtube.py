@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QIcon
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.download.function_downloadui import DownloadUI
-from screen.download.worker_download import DownloadWorker
+from screen.download.worker_download import DownloadWorker, URLValidator
 
 class YoutubeDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
+        self.validator = URLValidator()
         self.initUI()
     
     def initUI(self):
@@ -55,22 +56,27 @@ class YoutubeDownloadPage(QWidget):
 
     def download_youtube_audio(self):
         youtube_link = self.download_ui.link_input.text()
-        if youtube_link:
-            # Thêm mục tải vào danh sách
-            name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
-
-            # Tạo và chạy worker thread
-            self.worker = DownloadWorker(youtube_link)
-            self.worker.progress.connect(lambda value: progress_bar.setValue(value))
-            self.worker.finished.connect(
-                lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
-            )
-            self.worker.error.connect(
-                lambda err: self.on_download_error(err, main_layout.parentWidget())
-            )
-            self.worker.start()
-        else:
+        if not youtube_link:
             print("Please enter a YouTube link")
+            return
+
+        # Kiểm tra URL trước khi tải
+        is_valid, message, platform = self.validator.is_valid_url(youtube_link)
+        if not is_valid or platform != 'youtube':
+            print(f"Error: {message if not is_valid else 'This is not a valid YouTube URL'}")
+            return
+
+        # Nếu URL hợp lệ và là YouTube, tiến hành tải
+        name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        self.worker = DownloadWorker(youtube_link)
+        self.worker.progress.connect(lambda value: progress_bar.setValue(value))
+        self.worker.finished.connect(
+            lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
+        )
+        self.worker.error.connect(
+            lambda err: self.on_download_error(err, main_layout.parentWidget())
+        )
+        self.worker.start()
 
     def on_download_error(self, error_message, file_widget):
         """Xử lý khi có lỗi tải"""

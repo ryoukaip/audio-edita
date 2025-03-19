@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, QSize, QPropertyAnimation, QEasingCurve, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QProgressBar
 from PyQt5.QtGui import QFont, QIcon
 from screen.function.system.function_scrollarea import CustomScrollArea
+from screen.function.system.function_marqueelabel import MarqueeLabel
 
 class DownloadUI(QWidget):
     def __init__(self, placeholder_text="paste url here"):
@@ -124,7 +125,7 @@ class DownloadUI(QWidget):
         info_layout = QHBoxLayout()
         info_layout.setContentsMargins(12, 5, 12, 5)
         
-        name_label = QLabel("Downloading...")
+        name_label = MarqueeLabel("Downloading...")
         name_label.setFont(QFont(self.font_family, 12))
         name_label.setStyleSheet("color: white;")
         name_label.setAlignment(Qt.AlignLeft)
@@ -157,27 +158,10 @@ class DownloadUI(QWidget):
             }
         """)
         main_layout.addWidget(progress_bar)
-        
         self.scroll_layout.addWidget(file_widget)
         
         # Cuộn mượt mà xuống dưới
-        scrollbar = self.scroll_area.verticalScrollBar()
-        current_pos = scrollbar.value()
-        target_pos = scrollbar.maximum()
-        
-        scroll_animation = QPropertyAnimation(scrollbar, b"value")
-        scroll_animation.setDuration(500)
-        scroll_animation.setStartValue(current_pos)
-        scroll_animation.setEndValue(target_pos)
-        scroll_animation.setEasingCurve(QEasingCurve.InOutQuad)
-        
-        def start_scroll_animation():
-            scrollbar = self.scroll_area.verticalScrollBar()
-            scroll_animation.setEndValue(scrollbar.maximum())
-            scroll_animation.start()
-        
-        QTimer.singleShot(0, start_scroll_animation)
-        
+        self.scroll_area.scroll_to_bottom()
         return name_label, size_label, progress_bar, main_layout
 
     def update_download_item(self, name_label, size_label, progress_bar, main_layout, file_name, file_size):

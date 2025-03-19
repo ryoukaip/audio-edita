@@ -55,22 +55,27 @@ class TidalDownloadPage(QWidget):
 
     def download_tidal_audio(self):
         tidal_link = self.download_ui.link_input.text()
-        if tidal_link:
-            # Thêm mục tải vào danh sách
-            name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        if not tidal_link:
+            print("Please enter a TikTok link")
+            return
 
-            # Tạo và chạy worker thread
-            self.worker = DownloadWorker(tidal_link)
-            self.worker.progress.connect(lambda value: progress_bar.setValue(value))
-            self.worker.finished.connect(
-                lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
-            )
-            self.worker.error.connect(
-                lambda err: self.on_download_error(err, main_layout.parentWidget())
-            )
-            self.worker.start()
-        else:
-            print("Please enter a Tidal link")
+        # Kiểm tra URL trước khi tải
+        is_valid, message, platform = self.validator.is_valid_url(tidal_link)
+        if not is_valid or platform != 'tidal':
+            print(f"Error: {message if not is_valid else 'This is not a valid TikTok URL'}")
+            return
+
+        # Nếu URL hợp lệ và là Tiktok, tiến hành tải
+        name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
+        self.worker = DownloadWorker(tidal_link)
+        self.worker.progress.connect(lambda value: progress_bar.setValue(value))
+        self.worker.finished.connect(
+            lambda name, size: self.download_ui.update_download_item(name_label, size_label, progress_bar, main_layout, name, size)
+        )
+        self.worker.error.connect(
+            lambda err: self.on_download_error(err, main_layout.parentWidget())
+        )
+        self.worker.start()
 
     def on_download_error(self, error_message, file_widget):
         """Xử lý khi có lỗi tải"""

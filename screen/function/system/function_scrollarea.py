@@ -103,3 +103,22 @@ class CustomScrollArea(QScrollArea):
         self.fade_animation.setStartValue(self._scroll_alpha)
         self.fade_animation.setEndValue(0)
         self.fade_animation.start()
+
+    def scroll_to_bottom(self):
+        """Cuộn mượt mà xuống dưới cùng của scroll area"""
+        scrollbar = self.verticalScrollBar()
+        current_pos = scrollbar.value()
+        target_pos = scrollbar.maximum()
+
+        # Tạo animation mới để không xung đột với scroll_animation hiện có
+        bottom_animation = QPropertyAnimation(scrollbar, b"value")
+        bottom_animation.setDuration(500)
+        bottom_animation.setStartValue(current_pos)
+        bottom_animation.setEndValue(target_pos)
+        bottom_animation.setEasingCurve(QEasingCurve.InOutQuad)
+
+        def update_target():
+            bottom_animation.setEndValue(scrollbar.maximum())
+            bottom_animation.start()
+
+        QTimer.singleShot(0, update_target)
