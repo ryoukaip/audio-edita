@@ -72,7 +72,7 @@ class CheckOfflinePage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         self.compare_btn.clicked.connect(self.compare_audio)

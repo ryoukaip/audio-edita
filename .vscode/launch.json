@@ -9,6 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/app.py",
+            //"program": "${workspaceFolder}/screen/boot/boot.py",
             "console": "integratedTerminal"
         }
     ]

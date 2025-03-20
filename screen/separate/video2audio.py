@@ -51,7 +51,7 @@ class Video2AudioPage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         self.open_location_btn.clicked.connect(self.open_file_location)
@@ -69,7 +69,7 @@ class Video2AudioPage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         self.export_btn.clicked.connect(self.export_audio)

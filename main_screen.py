@@ -28,10 +28,10 @@ from screen.download.facebook import FacebookDownloadPage
 from screen.download.instagram import InstagramDownloadPage
 from screen.download.x import XDownloadPage
 from screen.download.soundcloud import SoundcloudDownloadPage
-from screen.download.bandcamp import BandcampDownloadPage
-from screen.download.deezer import DeezerDownloadPage
-from screen.download.tidal import TidalDownloadPage
-from screen.download.mixcloud import MixcloudDownloadPage
+from screen.download.bluesky import BlueskyDownloadPage
+from screen.download.tumblr import TumblrDownloadPage
+from screen.download.reddit import RedditDownloadPage
+from screen.download.bilibili import BilibiliDownloadPage
 from screen.separate.output_separate import OutputSeparateWidget
 from screen.function.mainscreen.function_titlebar import CustomTitleBar
 from screen.function.mainscreen.function_sidebar import CustomSidebar
@@ -98,10 +98,10 @@ class AudioEditorUI(QMainWindow):
         self.stack.addWidget(InstagramDownloadPage())
         self.stack.addWidget(XDownloadPage())
         self.stack.addWidget(SoundcloudDownloadPage())
-        self.stack.addWidget(BandcampDownloadPage())
-        self.stack.addWidget(DeezerDownloadPage())
-        self.stack.addWidget(TidalDownloadPage())
-        self.stack.addWidget(MixcloudDownloadPage())
+        self.stack.addWidget(BlueskyDownloadPage())
+        self.stack.addWidget(TumblrDownloadPage())
+        self.stack.addWidget(RedditDownloadPage())
+        self.stack.addWidget(BilibiliDownloadPage())
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)

@@ -84,8 +84,8 @@ class MenuDownloadPage(QWidget):
             ("youtube", "./icon/video.png"), ("tiktok", "./icon/tiktok.png"),
             ("facebook", "./icon/facebook.png"), ("instagram", "./icon/instagram.png"),
             ("x", "./icon/x.png"), ("soundcloud", "./icon/soundcloud.png"),
-            ("bandcamp", "./icon/bandcamp.png"), ("deezer", "./icon/deezer.png"),
-            ("tidal", "./icon/tidal.png"), ("mixcloud", "./icon/mixcloud.png"),
+            ("bluesky", "./icon/bluesky.png"), ("tumblr", "./icon/tumblr.png"),
+            ("reddit", "./icon/reddit.png"), ("bilibili", "./icon/bilibili.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
@@ -103,14 +103,14 @@ class MenuDownloadPage(QWidget):
                 btn.clicked.connect(self.show_x_page)
             elif text == "soundcloud":
                 btn.clicked.connect(self.show_soundcloud_page)
-            elif text == "bandcamp":
-                btn.clicked.connect(self.show_bandcamp_page)
-            elif text == "deezer":
-                btn.clicked.connect(self.show_deezer_page)
-            elif text == "tidal":
-                btn.clicked.connect(self.show_tidal_page)
-            elif text == "mixcloud":
-                btn.clicked.connect(self.show_mixcloud_page)
+            elif text == "bluesky":
+                btn.clicked.connect(self.show_bluesky_page)
+            elif text == "tumblr":
+                btn.clicked.connect(self.show_tumblr_page)
+            elif text == "reddit":
+                btn.clicked.connect(self.show_reddit_page)
+            elif text == "bilibili":
+                btn.clicked.connect(self.show_bilibili_page)
             grid.addWidget(btn, *pos)
         
         container.setFixedWidth(650)
@@ -155,25 +155,25 @@ class MenuDownloadPage(QWidget):
             stack = main_window.stack
             stack.setCurrentIndex(24)
 
-    def show_bandcamp_page(self):
+    def show_bluesky_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(25)
     
-    def show_deezer_page(self):
+    def show_tumblr_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(26)
 
-    def show_tidal_page(self):
+    def show_reddit_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
             stack.setCurrentIndex(27) 
     
-    def show_mixcloud_page(self):
+    def show_bilibili_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack

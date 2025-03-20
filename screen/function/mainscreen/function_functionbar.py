@@ -34,16 +34,10 @@ class FunctionBar(QHBoxLayout):
         title_label.setStyleSheet("color: white; background: transparent;")
         title_label.setContentsMargins(4, 0, 0, 0)
 
-        # Action buttons
-        trash_button = QPushButton()
-        trash_button.setIcon(QIcon("./icon/trash.png"))
-        trash_button.setIconSize(QSize(15, 15))
-        trash_button.setFixedSize(32, 32)
-
-        menu_button = QPushButton()
-        menu_button.setIcon(QIcon("./icon/menu.png"))
-        menu_button.setIconSize(QSize(15, 15))
-        menu_button.setFixedSize(32, 32)
+        infor_button = QPushButton()
+        infor_button.setIcon(QIcon("./icon/faq.png"))
+        infor_button.setIconSize(QSize(15, 15))
+        infor_button.setFixedSize(32, 32)
 
         action_buttons_style = """
             QPushButton {
@@ -52,15 +46,14 @@ class FunctionBar(QHBoxLayout):
                 border: none;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """
-        trash_button.setStyleSheet(action_buttons_style)
-        menu_button.setStyleSheet(action_buttons_style)
+        infor_button.setStyleSheet(action_buttons_style)
+        
 
         # Add widgets to layout
         self.addWidget(back_button)
         self.addWidget(title_label)
         self.addStretch()
-        self.addWidget(trash_button)
-        self.addWidget(menu_button)
+        self.addWidget(infor_button)

@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QStackedWidget, QHBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
-from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QTimer
 
 from main_screen import AudioEditorUI
 
@@ -14,6 +14,11 @@ class WelcomeWindow(QMainWindow):
         self.main_window = main_window
         self.initUI()
         self.center()
+
+        # Setup auto-page switching timer
+        self.page_timer = QTimer(self)
+        self.page_timer.timeout.connect(self.auto_next_page)
+        self.page_timer.start(3500)
 
     def initUI(self):
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
@@ -172,22 +177,31 @@ class WelcomeWindow(QMainWindow):
         self.stack.setCurrentIndex(self.current_page)
         self.update_dots()
 
+        if page_index < 4: 
+            self.page_timer.start(3500)
+        else:
+            self.page_timer.stop()
+
     def start_transition(self):
+        # Emit closed signal first to trigger boot screen preparation
+        self.closed.emit()
+        
+        # Create fade out animation for welcome window
         self.fade_out_animation = QPropertyAnimation(self, b"windowOpacity")
         self.fade_out_animation.setDuration(700)
         self.fade_out_animation.setStartValue(1.0)
         self.fade_out_animation.setEndValue(0.0)
         self.fade_out_animation.setEasingCurve(QEasingCurve.InOutQuad)
-        self.fade_out_animation.finished.connect(self.close_welcome)
+        self.fade_out_animation.finished.connect(self.hide)  
 
-        self.fade_in_animation = QPropertyAnimation(self.main_window, b"windowOpacity")
-        self.fade_in_animation.setDuration(700)
-        self.fade_in_animation.setStartValue(0.0)
-        self.fade_in_animation.setEndValue(1.0)
-        self.fade_in_animation.setEasingCurve(QEasingCurve.InOutQuad)
-
+        # Start fade out
         self.fade_out_animation.start()
-        self.fade_in_animation.start()
+
+    def auto_next_page(self):
+        if self.current_page < 4:  # We have 5 pages (0-4)
+            self.go_to_page(self.current_page + 1)
+        else:
+            self.page_timer.stop()
 
     def close_welcome(self):
         self.closed.emit()

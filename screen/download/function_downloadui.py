@@ -53,13 +53,13 @@ class DownloadUI(QWidget):
         self.paste_btn.setIconSize(QSize(20, 20))
         self.paste_btn.setStyleSheet("""
             QPushButton {
-                background-color: #474f7a;
+                background-color: #6574c6;
                 border-radius: 10px;
                 border: none;
                 color: white;
             }
             QPushButton:hover {
-                background-color: #292d47;
+                background-color: #474f7a;
                 border: none;
             }
         """)
@@ -73,13 +73,13 @@ class DownloadUI(QWidget):
         self.download_btn.setIconSize(QSize(20, 20))
         self.download_btn.setStyleSheet("""
             QPushButton {
-                background-color: #474f7a;
+                background-color: #6574c6;
                 border-radius: 10px;
                 border: none;
                 color: white;
             }
             QPushButton:hover {
-                background-color: #292d47;
+                background-color: #474f7a;
                 border: none;
             }
         """)

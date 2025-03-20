@@ -1,6 +1,6 @@
 import os
 from PyQt5.QtCore import Qt, QUrl, QTimer, QSize
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QIcon
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.download.function_downloadui import DownloadUI
@@ -34,7 +34,24 @@ class YoutubeDownloadPage(QWidget):
 
         # Thanh nút dưới cùng
         button_layout = QHBoxLayout()
-        button_layout.addStretch()
+
+        # Tạo layout dọc cho hai dòng chữ
+        copyright_layout = QVBoxLayout()
+        copyright_layout.setSpacing(0)
+
+        copyright_notice1 = QLabel("• respect copyrighted content")
+        copyright_notice1.setFont(QFont(font_family, 8)) 
+        copyright_notice1.setStyleSheet("color: #aaaaaa;") 
+        copyright_layout.addWidget(copyright_notice1)
+
+        copyright_notice2 = QLabel("• do not use copyrighted content without permission")
+        copyright_notice2.setFont(QFont(font_family, 8))  
+        copyright_notice2.setStyleSheet("color: #aaaaaa;")  
+        copyright_layout.addWidget(copyright_notice2)
+
+        # Thêm layout dọc vào layout ngang
+        button_layout.addLayout(copyright_layout)
+        button_layout.addStretch()  # Đẩy nút sang phải
 
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)

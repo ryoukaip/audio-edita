@@ -167,7 +167,7 @@ class CheckOnlinePage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         self.analyze_button.clicked.connect(self.start_recognition)

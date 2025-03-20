@@ -102,7 +102,7 @@ class TrimPage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         self.open_location_btn.clicked.connect(self.open_file_location)
@@ -120,7 +120,7 @@ class TrimPage(QWidget):
                 color: white;
             }
             QPushButton:hover {
-                background-color: #474f7a;
+                background-color: #292d47;
             }
         """)
         export_btn.clicked.connect(self.show_output_widget)
