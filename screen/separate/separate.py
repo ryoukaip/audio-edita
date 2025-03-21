@@ -285,25 +285,20 @@ class SeparatePage(QWidget):
             self.render_window.updateProgress(100)
             self.render_window.updateStatus("Separation complete!")
             self.render_window.updateTimeRemaining("Done!")
-            # Close render window after 1 second
             QTimer.singleShot(1000, self.render_window.close)
-
-        # Đánh dấu là đã hoàn thành
         self.separation_is_complete = True
         
         # Switch to output view and update with new separation results
         main_window = self.window()
         if main_window and hasattr(main_window, 'stack'):
-            # Lấy widget output (giả sử nó ở index 15)
-            output_widget = main_window.stack.widget(15)
+            output_widget = main_window.page_mapping.get("OutputSeparate")
             
-            # Kiểm tra nếu là OutputSeparateWidget
             if isinstance(output_widget, OutputSeparateWidget):
-                # Cập nhật thông tin cho widget
                 output_widget.update_audio_files(output_path, self.selected_file)
             
             # Chuyển đến trang output
-            main_window.stack.setCurrentIndex(15)
+            if output_widget:
+                main_window.stack.setCurrentWidget(output_widget)
 
     def separation_error(self, error_message):
         """Handle separation errors"""
@@ -332,6 +327,8 @@ class SeparatePage(QWidget):
     
     def go_back(self):
         main_window = self.window()
-        if main_window and hasattr(main_window, 'stack'):
+        if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(1)
+            page_widget = main_window.page_mapping.get("MenuSeparate")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

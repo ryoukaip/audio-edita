@@ -1,20 +1,19 @@
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QPushButton, QHBoxLayout, QSlider, QApplication
-from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QPixmap
-from PyQt5.QtCore import Qt, QUrl, QTimer, QThread, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBoxLayout, QApplication, QLabel
+from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
+from PyQt5.QtCore import Qt, QTimer, QUrl
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_slider import Slider
 from screen.function.system.function_notiwindow import NotiWindow
-from screen.edit.worker_speed import SpeedWorker
+from screen.separate.worker_noise import NoiseWorker
 
-class SpeedPage(QWidget):
+class NoisePage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
         self.initUI()
-    
+
     def initUI(self):
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
@@ -23,22 +22,43 @@ class SpeedPage(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(25, 15, 25, 25)
 
-        top_bar = FunctionBar("speed", font_family, self)
+        top_bar = FunctionBar("noise reduction", font_family, self)
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        self.audio_player = DropAreaLabel()
-        self.audio_player.setFixedHeight(220)
-        self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.audio_player.file_dropped.connect(self.on_file_dropped)
-        layout.addWidget(self.audio_player)
-        layout.addSpacing(10)
+        player_layout = QHBoxLayout()
 
-        self.speed_slider_widget = Slider(font_family, mode="speed", min_value=25, max_value=400, default_value=100, unit="x", icon_path="./icon/speed.png")
-        self.speed_slider_widget.value_changed.connect(self.handle_speed_change)
-        layout.addWidget(self.speed_slider_widget)
-        layout.addSpacing(15)
+        # Trình phát Before
+        before_layout = QVBoxLayout()
+        self.audio_player_before = DropAreaLabel()
+        self.audio_player_before.setFixedHeight(220)
+        self.audio_player_before.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.audio_player_before.file_dropped.connect(self.on_file_dropped)
+        before_label = QLabel("Before")
+        before_label.setFont(QFont(font_family, 12))
+        before_label.setStyleSheet("color: white;")
+        before_label.setAlignment(Qt.AlignCenter)
+        before_layout.addWidget(self.audio_player_before)
+        before_layout.addWidget(before_label)
 
+        player_layout.addLayout(before_layout)
+        player_layout.addSpacing(10)
+
+        # Trình phát After
+        after_layout = QVBoxLayout()
+        self.audio_player_after = DropAreaLabel()
+        self.audio_player_after.setFixedHeight(220)
+        self.audio_player_after.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        after_label = QLabel("After")
+        after_label.setFont(QFont(font_family, 12))
+        after_label.setStyleSheet("color: white;")
+        after_label.setAlignment(Qt.AlignCenter)
+        after_layout.addWidget(self.audio_player_after)
+        after_layout.addWidget(after_label)
+
+        player_layout.addLayout(after_layout)
+
+        layout.addLayout(player_layout)
         layout.addStretch()
 
         button_layout = QHBoxLayout()
@@ -48,14 +68,8 @@ class SpeedPage(QWidget):
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
         self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
+            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
+            QPushButton:hover { background-color: #292d47; }
         """)
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
@@ -66,28 +80,18 @@ class SpeedPage(QWidget):
         self.export_btn.setFixedSize(100, 40)
         self.export_btn.setFont(QFont(font_family, 13))
         self.export_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
+            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
+            QPushButton:hover { background-color: #292d47; }
         """)
         self.export_btn.clicked.connect(self.export_audio)
         button_layout.addWidget(self.export_btn)
 
         layout.addLayout(button_layout)
-
         self.setStyleSheet("background-color: #282a32;")
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
         self.selected_audio_file = file_path
-
-    def handle_speed_change(self, value):
-        pass
 
     def export_audio(self):
         if not self.selected_audio_file:
@@ -96,8 +100,7 @@ class SpeedPage(QWidget):
             return
 
         print(f"Starting export for file: {self.selected_audio_file}")
-        
-        # Hiển thị cửa sổ render
+
         self.render_window = RenderWindow(None)
         self.render_window.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         screen_geometry = QApplication.desktop().screenGeometry()
@@ -110,9 +113,7 @@ class SpeedPage(QWidget):
 
         self.export_btn.setEnabled(False)
 
-        # Tạo worker thread
-        speed_factor = self.speed_slider_widget.get_processed_value()
-        self.worker = SpeedWorker(self.selected_audio_file, speed_factor)
+        self.worker = NoiseWorker(self.selected_audio_file, True)
         self.worker.progress_updated.connect(self.update_progress)
         self.worker.finished.connect(self.on_export_finished)
         self.worker.error.connect(self.on_export_error)
@@ -129,7 +130,7 @@ class SpeedPage(QWidget):
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
-        self.audio_player.set_audio_file(output_file)
+        self.audio_player_after.set_audio_file(output_file)
         self.export_btn.setEnabled(True)
 
     def on_export_error(self, error_message):
@@ -139,16 +140,14 @@ class SpeedPage(QWidget):
         self.export_btn.setEnabled(True)
 
     def open_file_location(self):
-        documents_path = os.path.join(os.path.expanduser("~"), "Documents")
-        output_dir = os.path.join(documents_path, "audio-edita", "edit", "speed")
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        output_dir = os.path.join(os.path.expanduser("~"), "Documents", "audio-edita", "edit", "noise")
+        os.makedirs(output_dir, exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(output_dir))
 
     def go_back(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("MenuEdit")
+            page_widget = main_window.page_mapping.get("MenuSeparate")
             if page_widget:
                 stack.setCurrentWidget(page_widget)

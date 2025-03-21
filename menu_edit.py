@@ -123,58 +123,78 @@ class MenuEditPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(4)
+            page_widget = main_window.page_mapping.get("Equalizer")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_trim_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(5)
+            page_widget = main_window.page_mapping.get("Trim")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_merge_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(6)
+            page_widget = main_window.page_mapping.get("Merge")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_split_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(7)
+            page_widget = main_window.page_mapping.get("Split")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_volume_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(8)
+            page_widget = main_window.page_mapping.get("Volume")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_reverse_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(9)
+            page_widget = main_window.page_mapping.get("Reverse")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_speed_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(10)
+            page_widget = main_window.page_mapping.get("Speed")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_compress_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(11)
+            page_widget = main_window.page_mapping.get("Compress")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_convert_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(12)
+            page_widget = main_window.page_mapping.get("Convert")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_voice_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(13)
+            page_widget = main_window.page_mapping.get("Voice")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

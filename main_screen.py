@@ -20,6 +20,7 @@ from screen.edit.convert import ConvertPage
 from screen.edit.voice import VoicePage
 from screen.separate.separate import SeparatePage
 from screen.separate.video2audio import Video2AudioPage
+from screen.separate.noise import NoisePage
 from screen.check.checkonline import CheckOnlinePage
 from screen.check.checkoffline import CheckOfflinePage
 from screen.download.youtube import YoutubeDownloadPage
@@ -44,6 +45,8 @@ class AudioEditorUI(QMainWindow):
         self.dragging = False
         self.drag_pos = QPoint()
         self.is_maximized = False
+        # Thêm từ điển để ánh xạ các trang
+        self.page_mapping = {}
         self.initUI()
 
     def initUI(self):
@@ -73,35 +76,38 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.buttonClicked.connect(self.handle_sidebar_button)
         
         self.stack = QStackedWidget()
-        self.stack.addWidget(MenuEditPage())
-        self.stack.addWidget(MenuSeparatePage())
-        self.stack.addWidget(MenuCheckPage())
-        self.stack.addWidget(MenuDownloadPage())
-        self.stack.addWidget(EqualizerPage())
-        self.stack.addWidget(TrimPage())
-        self.stack.addWidget(MergePage())
-        self.stack.addWidget(SplitPage())
-        self.stack.addWidget(VolumePage())
-        self.stack.addWidget(ReversePage())
-        self.stack.addWidget(SpeedPage())
-        self.stack.addWidget(CompressPage())
-        self.stack.addWidget(ConvertPage())
-        self.stack.addWidget(VoicePage())
-        self.stack.addWidget(CheckOnlinePage())
-        self.stack.addWidget(CheckOfflinePage())
-        self.stack.addWidget(OutputSeparateWidget())
-        self.stack.addWidget(SeparatePage())
-        self.stack.addWidget(Video2AudioPage())
-        self.stack.addWidget(YoutubeDownloadPage())
-        self.stack.addWidget(TiktokDownloadPage())
-        self.stack.addWidget(FacebookDownloadPage())
-        self.stack.addWidget(InstagramDownloadPage())
-        self.stack.addWidget(XDownloadPage())
-        self.stack.addWidget(SoundcloudDownloadPage())
-        self.stack.addWidget(BlueskyDownloadPage())
-        self.stack.addWidget(TumblrDownloadPage())
-        self.stack.addWidget(RedditDownloadPage())
-        self.stack.addWidget(BilibiliDownloadPage())
+        
+        # Thêm các trang với định danh
+        self.add_page("MenuEdit", MenuEditPage())
+        self.add_page("MenuSeparate", MenuSeparatePage())
+        self.add_page("MenuCheck", MenuCheckPage())
+        self.add_page("MenuDownload", MenuDownloadPage())
+        self.add_page("Equalizer", EqualizerPage())
+        self.add_page("Trim", TrimPage())
+        self.add_page("Merge", MergePage())
+        self.add_page("Split", SplitPage())
+        self.add_page("Volume", VolumePage())
+        self.add_page("Reverse", ReversePage())
+        self.add_page("Speed", SpeedPage())
+        self.add_page("Compress", CompressPage())
+        self.add_page("Convert", ConvertPage())
+        self.add_page("Voice", VoicePage())
+        self.add_page("CheckOnline", CheckOnlinePage())
+        self.add_page("CheckOffline", CheckOfflinePage())
+        self.add_page("OutputSeparate", OutputSeparateWidget())
+        self.add_page("Separate", SeparatePage())
+        self.add_page("Video2Audio", Video2AudioPage())
+        self.add_page("Noise", NoisePage())
+        self.add_page("YoutubeDownload", YoutubeDownloadPage())
+        self.add_page("TiktokDownload", TiktokDownloadPage())
+        self.add_page("FacebookDownload", FacebookDownloadPage())
+        self.add_page("InstagramDownload", InstagramDownloadPage())
+        self.add_page("XDownload", XDownloadPage())
+        self.add_page("SoundcloudDownload", SoundcloudDownloadPage())
+        self.add_page("BlueskyDownload", BlueskyDownloadPage())
+        self.add_page("TumblrDownload", TumblrDownloadPage())
+        self.add_page("RedditDownload", RedditDownloadPage())
+        self.add_page("BilibiliDownload", BilibiliDownloadPage())
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)
@@ -115,6 +121,11 @@ class AudioEditorUI(QMainWindow):
 
         self.sidebar.set_active_button(self.sidebar.edit_btn)
         self.is_maximized = False
+
+    def add_page(self, page_id, page_widget):
+        """Thêm một trang vào stack và lưu vào từ điển ánh xạ."""
+        index = self.stack.addWidget(page_widget)
+        self.page_mapping[page_id] = page_widget
 
     def center_window(self):
         screen = QApplication.primaryScreen()
@@ -134,12 +145,25 @@ class AudioEditorUI(QMainWindow):
         self.title_bar.toggleMaximize()
 
     def handle_sidebar_button(self, index, button):
+        """Xử lý sự kiện nhấn nút sidebar, sử dụng định danh thay vì chỉ số."""
         if button == self.sidebar.edit_btn:
-            self.stack.setCurrentIndex(0)  # MenuEditPage
+            page_id = "MenuEdit"
         elif button == self.sidebar.separate_btn:
-            self.stack.setCurrentIndex(1)  # MenuSeparatePage
+            page_id = "MenuSeparate"
         elif button == self.sidebar.check_btn:
-            self.stack.setCurrentIndex(2)  # MenuCheckPage
+            page_id = "MenuCheck"
         elif button == self.sidebar.download_btn:
-            self.stack.setCurrentIndex(3)  # MenuDownloadPage
+            page_id = "MenuDownload"
+        else:
+            return 
+        
+        page_widget = self.page_mapping.get(page_id)
+        if page_widget:
+            self.stack.setCurrentWidget(page_widget)
         self.sidebar.set_active_button(button)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = AudioEditorUI()
+    window.show()
+    sys.exit(app.exec_())

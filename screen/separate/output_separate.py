@@ -74,7 +74,7 @@ class OutputSeparateWidget(QWidget):
                 background-color: #474f7a;
             }
         """)
-        done_btn.clicked.connect(self.return_to_separate)
+        done_btn.clicked.connect(self.go_back)
 
         # Add buttons to layout in correct order
         button_layout.addWidget(self.open_location_btn)
@@ -199,7 +199,10 @@ class OutputSeparateWidget(QWidget):
         stretch_index = layout.count() - 1
         layout.insertLayout(stretch_index, track_layout)
 
-    def return_to_separate(self):
-        # Get main window and switch back to separate page (index 1)
+    def go_back(self):
         main_window = self.window()
-        main_window.stack.setCurrentIndex(1)
+        if main_window:
+            stack = main_window.stack
+            page_widget = main_window.page_mapping.get("Separate")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

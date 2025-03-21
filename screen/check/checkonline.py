@@ -178,10 +178,12 @@ class CheckOnlinePage(QWidget):
         self.setStyleSheet("background-color: #282a32;")
 
     def go_back(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            stack.setCurrentIndex(2)
+            main_window = self.window()
+            if main_window:
+                stack = main_window.stack
+                page_widget = main_window.page_mapping.get("MenuCheck")
+                if page_widget:
+                    stack.setCurrentWidget(page_widget)
 
     def toggle_playback(self):
         # Placeholder

@@ -265,6 +265,8 @@ class TrimPage(QWidget):
         
     def go_back(self):
         main_window = self.window()
-        if main_window and hasattr(main_window, 'stack'):
+        if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(0)
+            page_widget = main_window.page_mapping.get("MenuEdit")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

@@ -99,14 +99,18 @@ class MenuCheckPage(QWidget):
         layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_online_page (self):
+    def show_online_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(14)
+            page_widget = main_window.page_mapping.get("CheckOnline")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_offline_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(15)
+            page_widget = main_window.page_mapping.get("CheckOffline")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

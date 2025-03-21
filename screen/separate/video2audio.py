@@ -154,6 +154,8 @@ class Video2AudioPage(QWidget):
 
     def go_back(self):
         main_window = self.window()
-        if main_window and hasattr(main_window, 'stack'):
+        if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(1)  # Quay lại trang chính hoặc trang trước
+            page_widget = main_window.page_mapping.get("MenuSeparate")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

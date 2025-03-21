@@ -145,4 +145,6 @@ class CheckOfflinePage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(2)
+            page_widget = main_window.page_mapping.get("MenuCheck")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

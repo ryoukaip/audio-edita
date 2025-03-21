@@ -82,6 +82,7 @@ class MenuSeparatePage(QWidget):
 
         buttons = [
             ("vocal", "./icon/micro.png"), ("video", "./icon/video.png"),
+            ("noise", "./icon/noise.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
@@ -91,22 +92,36 @@ class MenuSeparatePage(QWidget):
                 btn.clicked.connect(self.show_vocal_separation_page)
             elif text == "video":
                 btn.clicked.connect(self.show_video_page)
+            elif text == "noise":
+                btn.clicked.connect(self.show_noise_page)
             grid.addWidget(btn, *pos)
         
-        container.setFixedWidth(300)
+        container.setFixedWidth(400)
 
         layout.addLayout(title_subtitle_layout)
         layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_vocal_separation_page (self):
+    def show_vocal_separation_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(17)
+            page_widget = main_window.page_mapping.get("Separate")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_video_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(18)
+            page_widget = main_window.page_mapping.get("Video2Audio")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
+
+    def show_noise_page(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            page_widget = main_window.page_mapping.get("Noise")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

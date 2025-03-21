@@ -38,7 +38,7 @@ class FacebookDownloadPage(QWidget):
         copyright_layout = QVBoxLayout()
         copyright_layout.setSpacing(0)
 
-        copyright_notice1 = QLabel("• respect copyrighted content")
+        copyright_notice1 = QLabel("• respect audio creator")
         copyright_notice1.setFont(QFont(font_family, 8)) 
         copyright_notice1.setStyleSheet("color: #aaaaaa;") 
         copyright_layout.addWidget(copyright_notice1)
@@ -108,6 +108,8 @@ class FacebookDownloadPage(QWidget):
 
     def go_back(self):
         main_window = self.window()
-        if main_window and hasattr(main_window, 'stack'):
+        if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(3)
+            page_widget = main_window.page_mapping.get("MenuDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

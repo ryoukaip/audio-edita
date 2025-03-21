@@ -119,62 +119,82 @@ class MenuDownloadPage(QWidget):
         layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_youtube_page (self):
+    def show_youtube_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(19)
+            page_widget = main_window.page_mapping.get("YoutubeDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_tiktok_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(20)
+            page_widget = main_window.page_mapping.get("TiktokDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_facebook_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(21)
+            page_widget = main_window.page_mapping.get("FacebookDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_instagram_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(22)
-    
+            page_widget = main_window.page_mapping.get("InstagramDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
+
     def show_x_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(23)
+            page_widget = main_window.page_mapping.get("XDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_soundcloud_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(24)
+            page_widget = main_window.page_mapping.get("SoundcloudDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_bluesky_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(25)
-    
+            page_widget = main_window.page_mapping.get("BlueskyDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
+
     def show_tumblr_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(26)
+            page_widget = main_window.page_mapping.get("TumblrDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def show_reddit_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(27) 
-    
+            page_widget = main_window.page_mapping.get("RedditDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
+
     def show_bilibili_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            stack.setCurrentIndex(28)        
+            page_widget = main_window.page_mapping.get("BilibiliDownload")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)        
