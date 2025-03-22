@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
-from PyQt5.QtGui import QPainter, QColor, QPen
+from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint, QVariantAnimation
+from PyQt5.QtGui import QPainter, QColor, QPen, QLinearGradient
 
 class LoadingSpinner(QWidget):
     def __init__(self, parent=None):
@@ -16,26 +16,41 @@ class LoadingSpinner(QWidget):
         self.rotation_animation.setDuration(50)  # Duration for each step
         self.rotation_animation.valueChanged.connect(self.update)
         
+        # Indeterminate effect - shine animation
+        self.shine_position = 0
+        self.shine_animation = QVariantAnimation(self)
+        self.shine_animation.setStartValue(0)
+        self.shine_animation.setEndValue(360)  # Full circle
+        self.shine_animation.setDuration(1500)  # 1.5 seconds for one cycle
+        self.shine_animation.setLoopCount(-1)  # Loop infinitely
+        self.shine_animation.valueChanged.connect(self.update_shine)
+        
     def start(self):
-        self.timer.start(50)  # Update every 100ms
+        self.timer.start(50)  # Update every 50ms
+        self.shine_animation.start()
         self.show()
         
     def stop(self):
         self.timer.stop()
+        self.shine_animation.stop()
         self.hide()
         
     def rotate(self):
-        target_angle = (self.angle + 15) % 360  # Rotate 30 degrees each step
+        target_angle = (self.angle + 15) % 360  # Rotate 15 degrees each step
         self.rotation_animation.setStartValue(self.angle)
         self.rotation_animation.setEndValue(target_angle)
         self.rotation_animation.start()
         self.angle = target_angle
+    
+    def update_shine(self, value):
+        self.shine_position = value
+        self.update()
         
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Set up the pen
+        # Set up the pen for main arc
         pen = QPen(QColor("#FBFFE4"))  # Use the light color from your theme
         pen.setWidth(6)
         pen.setCapStyle(Qt.RoundCap)
@@ -46,6 +61,25 @@ class LoadingSpinner(QWidget):
         
         # Draw the arc
         painter.drawArc(rect, self.angle * 16, self.arc_length * 16)
+        
+        # Draw the shine effect (indeterminate animation)
+        shine_pen = QPen()
+        shine_pen.setWidth(6)
+        shine_pen.setCapStyle(Qt.RoundCap)
+        
+        # Create a gradient for the shine
+        gradient = QLinearGradient(rect.center().x(), rect.center().y() - 30, 
+                                  rect.center().x(), rect.center().y() + 30)
+        gradient.setColorAt(0.0, QColor(255, 255, 228, 0))  # Transparent
+        gradient.setColorAt(0.5, QColor("#FBFFE4"))  # Bright 
+        gradient.setColorAt(1.0, QColor(255, 255, 228, 0))  # Transparent
+        
+        shine_pen.setBrush(gradient)
+        painter.setPen(shine_pen)
+        
+        # Draw a small arc for the shine effect
+        shine_angle = (self.shine_position - 15) % 360
+        painter.drawArc(rect, shine_angle * 16, 30 * 16)  # 30 degree shine
 
 class LoadingOverlay(QWidget):
     def __init__(self, parent=None):

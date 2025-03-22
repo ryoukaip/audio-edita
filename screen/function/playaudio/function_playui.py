@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize
 from PyQt5.QtWidgets import (QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QSizePolicy)
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
 from screen.function.playaudio.function_wavevisual import WaveformWidget
@@ -128,21 +128,23 @@ def setup_player_ui(drop_area_label):
 
     # Create play button with icon
     drop_area_label.back_btn = QPushButton()
-    drop_area_label.back_btn.setFixedSize(30, 30)
+    drop_area_label.back_btn.setFixedSize(40, 30)
+    drop_area_label.back_btn.setIconSize(QSize(25, 25))
     drop_area_label.back_btn.setIcon(QIcon("./icon/arrow-back.png"))
-    drop_area_label.back_btn.clicked.connect(lambda: drop_area_label.seek_relative(-5000))
+    drop_area_label.back_btn.clicked.connect(lambda: drop_area_label.seek_relative(-10000))
 
     drop_area_label.play_btn = QPushButton()
-    drop_area_label.play_btn.setFixedSize(20, 20)
+    drop_area_label.play_btn.setFixedSize(30, 30)
     drop_area_label.play_icon = QIcon("./icon/play.png")
     drop_area_label.pause_icon = QIcon("./icon/pause.png")
     drop_area_label.play_btn.setIcon(drop_area_label.play_icon)
     drop_area_label.play_btn.clicked.connect(drop_area_label.toggle_playback)
 
     drop_area_label.forward_btn = QPushButton()
-    drop_area_label.forward_btn.setFixedSize(30, 30)
+    drop_area_label.forward_btn.setFixedSize(40, 30)
+    drop_area_label.forward_btn.setIconSize(QSize(25, 25))
     drop_area_label.forward_btn.setIcon(QIcon("./icon/arrow-forward.png"))
-    drop_area_label.forward_btn.clicked.connect(lambda: drop_area_label.seek_relative(5000))
+    drop_area_label.forward_btn.clicked.connect(lambda: drop_area_label.seek_relative(10000))
 
     # Create time labels
     drop_area_label.current_time = QLabel("00:00")

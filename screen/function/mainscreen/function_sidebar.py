@@ -17,13 +17,13 @@ class CustomSidebar(QWidget):
         sidebar.setContentsMargins(10, 10, 10, 10)
 
         # Create buttons
-        self.edit_btn = QPushButton(" Edit")
+        self.edit_btn = QPushButton(" edit")
         self.edit_btn.setIcon(QIcon("./icon/edit.png"))
-        self.separate_btn = QPushButton(" Separate")
+        self.separate_btn = QPushButton(" separate")
         self.separate_btn.setIcon(QIcon("./icon/trim.png"))
-        self.check_btn = QPushButton(" Check")
+        self.check_btn = QPushButton(" check")
         self.check_btn.setIcon(QIcon("./icon/check.png"))
-        self.download_btn = QPushButton(" Download")
+        self.download_btn = QPushButton(" download")
         self.download_btn.setIcon(QIcon("./icon/download.png"))
 
         # Style and setup buttons

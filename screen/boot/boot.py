@@ -1,8 +1,20 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QProgressBar
 from PyQt5.QtGui import QPixmap, QFont, QFontDatabase
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QUrl
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QUrl, QThread
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from screen.function.playaudio.function_playloading import LoadingSpinner
+
+class AudioLoader(QThread):
+    loaded = pyqtSignal(QMediaContent)
+    
+    def __init__(self, audio_path):
+        super().__init__()
+        self.audio_path = audio_path
+        
+    def run(self):
+        media_content = QMediaContent(QUrl.fromLocalFile(self.audio_path))
+        self.loaded.emit(media_content)
 
 class BootWindow(QWidget):
     closed = pyqtSignal()
@@ -15,11 +27,14 @@ class BootWindow(QWidget):
         self.setFixedSize(800, 600)
         self.center()
 
-        # Khởi tạo và tải âm thanh trước
+        # Khởi tạo player
         self.player = QMediaPlayer()
-        self.media_content = QMediaContent(QUrl.fromLocalFile("./audio/edita.mp3"))
-        self.player.setMedia(self.media_content)
         self.player.setVolume(100)
+        
+        # Tạo luồng để tải file âm thanh
+        self.audio_loader = AudioLoader("./audio/edita.mp3")
+        self.audio_loader.loaded.connect(self.on_audio_loaded)
+        self.audio_loader.start()
         
         # Kiểm tra trạng thái media và phát khi sẵn sàng
         self.player.mediaStatusChanged.connect(self.handle_media_status)
@@ -86,23 +101,36 @@ class BootWindow(QWidget):
         app_title.setStyleSheet("color: white;")
 
         # Nhãn trạng thái
-        self.status_label = QLabel("loading resources - 0%")
+        self.status_label = QLabel("loading resources")
         self.status_label.setFont(QFont(font_family, 14))
         self.status_label.setStyleSheet("color: white;")
         self.status_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        
+        # Thêm spinner
+        self.spinner = LoadingSpinner(self)
+        self.spinner.setFixedSize(30, 30)  # Điều chỉnh kích thước cho phù hợp
+        
+        # Layout cho status và spinner
+        status_container = QWidget()
+        status_layout = QHBoxLayout(status_container)
+        status_layout.setContentsMargins(0, 0, 0, 0)
+        status_layout.setSpacing(10)
+        status_layout.addWidget(self.status_label)
+        status_layout.addWidget(self.spinner)
 
         bottom_layout.addWidget(app_icon)
         bottom_layout.addWidget(app_title)
         bottom_layout.addStretch()
-        bottom_layout.addWidget(self.status_label)
+        bottom_layout.addWidget(status_container)
 
-        bottom_frame.setLayout(bottom_layout)  # Sửa custom_layout thành bottom_layout
+        bottom_frame.setLayout(bottom_layout)
 
-        # Thanh loading
+        # Thanh loading (ẩn)
         self.loading_bar = QProgressBar(self)
         self.loading_bar.setFixedHeight(8)
         self.loading_bar.setTextVisible(False)
         self.loading_bar.setValue(0)
+        self.loading_bar.setVisible(False)  # Ẩn thanh loading
         self.loading_bar.setStyleSheet("""
             QProgressBar {
                 border: none;
@@ -117,8 +145,8 @@ class BootWindow(QWidget):
         # Áp dụng layout
         main_layout.addWidget(image_container)
         main_layout.addStretch()
-        main_layout.addWidget(bottom_frame)  # Sửa custom_frame thành bottom_frame
-        main_layout.addWidget(self.loading_bar)
+        main_layout.addWidget(bottom_frame)
+        main_layout.addWidget(self.loading_bar)  # Vẫn giữ lại nhưng không hiển thị
         self.setLayout(main_layout)
 
         # Logic loading
@@ -126,6 +154,16 @@ class BootWindow(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(60)
+        
+        # Bắt đầu animation cho spinner
+        self.spinner.start()
+
+    def on_audio_loaded(self, media_content):
+        # Được gọi khi luồng tải âm thanh hoàn tất
+        self.player.setMedia(media_content)
+        # Phát nếu đã sẵn sàng
+        if self.player.mediaStatus() in [QMediaPlayer.BufferedMedia, QMediaPlayer.LoadedMedia]:
+            self.player.play()
 
     def center(self):
         screen = QApplication.desktop().screenGeometry()
@@ -140,14 +178,18 @@ class BootWindow(QWidget):
 
     def update_progress(self):
         self.progress += 1
-        self.loading_bar.setValue(self.progress)
-        self.status_label.setText(f"loading resources - {self.progress}%")
+        self.loading_bar.setValue(self.progress)  # Vẫn cập nhật giá trị nhưng không hiển thị
         if self.progress >= 100:
             self.timer.stop()
+            self.spinner.stop()
             self.close()
 
     def closeEvent(self, event):
         self.player.stop()
+        # Đảm bảo dừng thread trước khi đóng cửa sổ
+        if self.audio_loader.isRunning():
+            self.audio_loader.terminate()
+            self.audio_loader.wait()
         self.closed.emit()
         super().closeEvent(event)
 

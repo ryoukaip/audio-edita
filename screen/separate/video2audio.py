@@ -79,16 +79,8 @@ class Video2AudioPage(QWidget):
         self.setStyleSheet("background-color: #282a32;")
 
     def on_file_dropped(self, file_path):
-        logging.debug(f"File dropped: {file_path}")
-        video_extensions = {'.mp4', '.mkv', '.mov', '.flv', '.avi'}
-        if any(file_path.lower().endswith(ext) for ext in video_extensions):
-            self.selected_video_file = file_path
-            file_name = os.path.basename(file_path)
-            self.audio_player.setText(f"Loaded: {file_name}")
-            self.audio_player.set_audio_file(file_path)  # Giả sử DropAreaLabel xử lý phát âm thanh
-        else:
-            self.audio_player.setText("Only video files are supported (e.g., .mp4, .mkv, .mov, .flv, .avi)")
-            logging.warning(f"Unsupported file format: {file_path}")
+        print(f"File dropped: {file_path}")
+        self.selected_audio_file = file_path
 
     def export_audio(self):
         if not self.selected_video_file:
