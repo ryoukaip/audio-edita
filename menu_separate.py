@@ -61,7 +61,7 @@ class MenuSeparatePage(QWidget):
         layout.setContentsMargins(12, 50, 12, 12)
         layout.setSpacing(15)
         
-        title = QLabel("sound separation")
+        title = QLabel("audio separation")
         title.setFont(QFont(font_family, 16))
         title.setAlignment(Qt.AlignCenter)
         subtitle = QLabel("choose a function to start")

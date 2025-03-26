@@ -61,7 +61,7 @@ class MenuDownloadPage(QWidget):
         layout.setContentsMargins(12, 50, 12, 12)
         layout.setSpacing(15)
         
-        title = QLabel("download audio")
+        title = QLabel("audio download")
         title.setFont(QFont(font_family, 16))
         title.setAlignment(Qt.AlignCenter)
         subtitle = QLabel("choose a function to start")

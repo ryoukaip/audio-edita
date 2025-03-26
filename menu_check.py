@@ -61,7 +61,7 @@ class MenuCheckPage(QWidget):
         layout.setContentsMargins(12, 50, 12, 12)
         layout.setSpacing(15)
         
-        title = QLabel("copyright check")
+        title = QLabel("audio checking")
         title.setFont(QFont(font_family, 16))
         title.setAlignment(Qt.AlignCenter)
         subtitle = QLabel("choose a function to start")
