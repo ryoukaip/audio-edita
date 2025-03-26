@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLab
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QIcon
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.download.function_downloadui import DownloadUI
-from screen.download.worker_download import DownloadWorker
+from screen.download.worker_download import DownloadWorker, URLValidator  # Thêm URLValidator vào import
 
 class BlueskyDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
+        self.validator = URLValidator()  # Khởi tạo URLValidator
         self.initUI()
     
     def initUI(self):
@@ -73,16 +74,16 @@ class BlueskyDownloadPage(QWidget):
     def download_bluesky_audio(self):
         bluesky_link = self.download_ui.link_input.text()
         if not bluesky_link:
-            print("Please enter a TikTok link")
+            print("Please enter a Bluesky link")
             return
 
         # Kiểm tra URL trước khi tải
         is_valid, message, platform = self.validator.is_valid_url(bluesky_link)
         if not is_valid or platform != 'bluesky':
-            print(f"Error: {message if not is_valid else 'This is not a valid TikTok URL'}")
+            print(f"Error: {message if not is_valid else 'This is not a valid Bluesky URL'}")
             return
 
-        # Nếu URL hợp lệ và là Tiktok, tiến hành tải
+        # Nếu URL hợp lệ và là Bluesky, tiến hành tải
         name_label, size_label, progress_bar, main_layout = self.download_ui.add_download_item()
         self.worker = DownloadWorker(bluesky_link)
         self.worker.progress.connect(lambda value: progress_bar.setValue(value))

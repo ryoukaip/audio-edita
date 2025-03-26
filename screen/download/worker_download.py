@@ -69,8 +69,8 @@ class URLValidator:
                 r'^(https?://)?(?:www\.)?tumblr\.com/[\w-]+/\d+',
             ],
             'reddit': [
-                r'^(https?://)?(?:www\.)?reddit\.com/r/[\w-]+/comments/[\w-]+/[\w-]+/?$',
-                r'^(https?://)?redd\.it/[\w-]+',
+                r'^(https?://)?(?:www\.)?reddit\.com/r/[\w-]+/comments/[\w-]+/[\w-]+/?(?:\?.*)?$',  
+                r'^(https?://)?redd\.it/[\w-]+(?:\?.*)?$', 
             ],
             'bilibili': [
                 r'^(https?://)?(?:www\.)?bilibili\.com/video/[A-Za-z0-9]+',

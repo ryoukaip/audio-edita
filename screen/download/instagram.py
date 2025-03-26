@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLab
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QIcon
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.download.function_downloadui import DownloadUI
-from screen.download.worker_download import DownloadWorker
+from screen.download.worker_download import DownloadWorker, URLValidator
 
 class InstagramDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
+        self.validator = URLValidator()
         self.initUI()
     
     def initUI(self):
