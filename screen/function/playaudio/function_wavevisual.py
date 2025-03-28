@@ -32,10 +32,10 @@ class WaveformWidget(QWidget):
                 self.prev_waveform_data = self.waveform_data.copy()
             
             # Load audio với sr thấp hơn để giảm dữ liệu
-            audio, sr = librosa.load(file_path, sr=1000, mono=True)
+            audio, sr = librosa.load(file_path, sr=10, mono=True)
             
             # Giảm số lượng mẫu bằng cách lấy trung bình
-            target_samples = 500  # Số lượng mẫu mong muốn
+            target_samples = 1  
             samples_per_pixel = len(audio) // target_samples
             
             if samples_per_pixel > 1:

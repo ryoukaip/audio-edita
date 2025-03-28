@@ -84,8 +84,11 @@ def setup_player_ui(drop_area_label):
             margin: 0px;
         }
         QSlider::handle:horizontal {
-            width: 0px;
-            height: 0px;
+            width: 20px;             
+            height: 190px;
+            background: #transparent; 
+            margin-left: -10px;
+            margin-right: -10px
         }
         QSlider::sub-page:horizontal {
             height: 190px;

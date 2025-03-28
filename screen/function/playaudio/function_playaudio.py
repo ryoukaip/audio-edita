@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt, QMimeData, QUrl, QTimer, pyqtSignal
-from PyQt5.QtWidgets import (QLabel, QFileDialog)
+from PyQt5.QtWidgets import QLabel, QFileDialog, QShortcut
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtGui import QFont, QFontDatabase, QKeySequence
 from screen.function.playaudio.function_wavevisual import WaveformWidget
 from screen.function.playaudio.function_playloading import LoadingSpinner, LoadingOverlay
 from screen.function.playaudio.process_audio import AudioLoadWorker, format_time, is_audio_file
@@ -18,6 +18,7 @@ class DropAreaLabel(QLabel):
         super().__init__(parent)
         self.setAcceptDrops(True)
         self.setFixedHeight(220)
+        self.setFocusPolicy(Qt.StrongFocus)
         
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         self.font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
@@ -40,6 +41,12 @@ class DropAreaLabel(QLabel):
         self.player.stateChanged.connect(self.on_state_changed)
         self.player.positionChanged.connect(self.position_changed)
         self.player.durationChanged.connect(self.duration_changed)
+
+        self.seekbar.sliderPressed.connect(self.on_seekbar_pressed)  
+        self.seekbar.sliderReleased.connect(self.on_seekbar_released)  
+        self.seekbar.valueChanged.connect(self.on_seekbar_value_changed)
+
+        self.setup_shortcuts()
 
     def setupUI(self):
         setupUI(self)
@@ -207,6 +214,31 @@ class DropAreaLabel(QLabel):
     def seek_position(self, position):
         self.player.setPosition(position)
 
+    def on_seekbar_pressed(self):
+        """Tạm dừng âm thanh khi bắt đầu kéo seekbar."""
+        if self.player.state() == QMediaPlayer.PlayingState:
+            self.player.pause()
+            self.was_playing = True  # Lưu trạng thái phát trước khi kéo
+        else:
+            self.was_playing = False
+
+    def on_seekbar_released(self):
+        """Tiếp tục phát (nếu đang phát trước đó) khi thả seekbar."""
+        position = self.seekbar.value()
+        self.player.setPosition(position)
+        if self.was_playing:
+            self.player.play()
+
+    def on_seekbar_value_changed(self, value):
+        """Cập nhật thời gian và vị trí sóng khi kéo seekbar."""
+        if self.seekbar.isSliderDown():  # Chỉ cập nhật khi đang kéo
+            self.player.setPosition(value)
+            self.current_time.setText(format_time(value))
+            duration = self.player.duration()
+            if duration > 0:
+                progress = (value / duration) * 100
+                self.waveform.set_progress(progress)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.loading_overlay.setGeometry(self.rect())
@@ -214,6 +246,34 @@ class DropAreaLabel(QLabel):
     def seek_relative(self, ms):
         new_position = self.player.position() + ms
         self.player.setPosition(new_position)
+
+    def setup_shortcuts(self):
+        """Thiết lập các phím tắt."""
+        # Phím Space: Phát/Tạm dừng
+        self.shortcut_space = QShortcut(QKeySequence(Qt.Key_Space), self)
+        self.shortcut_space.activated.connect(self.toggle_playback)
+
+        # Phím Left: Lùi 5 giây
+        self.shortcut_left = QShortcut(QKeySequence(Qt.Key_Left), self)
+        self.shortcut_left.activated.connect(lambda: self.seek_relative(-5000))
+
+        # Phím Right: Tiến 5 giây
+        self.shortcut_right = QShortcut(QKeySequence(Qt.Key_Right), self)
+        self.shortcut_right.activated.connect(lambda: self.seek_relative(5000))
+
+        # Phím Home: Chuyển đến đầu
+        self.shortcut_home = QShortcut(QKeySequence(Qt.Key_Home), self)
+        self.shortcut_home.activated.connect(lambda: self.seek_position(0))
+
+        # Phím End: Chuyển đến cuối
+        self.shortcut_end = QShortcut(QKeySequence(Qt.Key_End), self)
+        self.shortcut_end.activated.connect(self.seek_to_end)
+
+    def seek_to_end(self):
+        """Chuyển đến cuối tệp âm thanh/video."""
+        duration = self.player.duration()
+        if duration > 0:
+            self.seek_position(duration)
 
     def clear(self):
         self.player.stop()
