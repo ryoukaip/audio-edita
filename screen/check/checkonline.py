@@ -1,3 +1,4 @@
+# screen/check/check_online.py
 import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QSizePolicy, QGridLayout
@@ -48,10 +49,11 @@ class RoundedPhotoLabel(QLabel):
             super().setPixmap(QPixmap())
 
 class CheckOnlinePage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager  # Gán audio_data_manager trước
         self.shazam_app = ShazamApp()  # Khởi tạo ShazamApp
-        self.initUI()
+        self.initUI()  # Gọi initUI sau khi đã gán audio_data_manager
     
     def initUI(self):
         # Add font
@@ -136,8 +138,8 @@ class CheckOnlinePage(QWidget):
         layout.addWidget(self.results_widget)
         layout.addSpacing(2)
         
-        # DropAreaLabel
-        self.audio_player = DropAreaLabel()
+        # DropAreaLabel (tích hợp AudioDataManager)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -176,14 +178,17 @@ class CheckOnlinePage(QWidget):
         layout.addLayout(button_layout)
         
         self.setStyleSheet("background-color: #282a32;")
+        
+        # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
+        self.audio_player.load_shared_audio()
 
     def go_back(self):
-            main_window = self.window()
-            if main_window:
-                stack = main_window.stack
-                page_widget = main_window.page_mapping.get("MenuCheck")
-                if page_widget:
-                    stack.setCurrentWidget(page_widget)
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            page_widget = main_window.page_mapping.get("MenuCheck")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)
 
     def toggle_playback(self):
         # Placeholder
@@ -192,6 +197,7 @@ class CheckOnlinePage(QWidget):
     def on_file_dropped(self, file_path):
         text = self.shazam_app.on_file_dropped(file_path)
         self.audio_player.setText(text)
+        # Tệp đã được lưu vào AudioDataManager qua DropAreaLabel
 
     def start_recognition(self):
         error, worker = self.shazam_app.start_recognition()
@@ -230,10 +236,3 @@ class CheckOnlinePage(QWidget):
         self.album_label.setText("???")
         self.year_label.setText("???")
         self.album_art_label.setPixmap(QPixmap())
-
-if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    window = CheckOnlinePage()
-    window.show()
-    sys.exit(app.exec_())

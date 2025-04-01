@@ -1,3 +1,4 @@
+# screen/function/playaudio/function_playaudio.py
 from PyQt5.QtCore import Qt, QMimeData, QUrl, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QFileDialog, QShortcut
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -12,10 +13,12 @@ import os
 class DropAreaLabel(QLabel):
     file_dropped = pyqtSignal(str)
     time_updated = pyqtSignal(str)
-    temp_file_updated = pyqtSignal(str)  # Thêm tín hiệu để báo temp_audio_file thay đổi
+    temp_file_updated = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, audio_data_manager=None, allow_drop=True, parent=None):
         super().__init__(parent)
+        self.audio_data_manager = audio_data_manager  # Thêm AudioDataManager
+        self.allow_drop = allow_drop  # Kiểm soát khả năng thả tệp
         self.setAcceptDrops(True)
         self.setFixedHeight(220)
         self.setFocusPolicy(Qt.StrongFocus)
@@ -27,7 +30,7 @@ class DropAreaLabel(QLabel):
         self.is_playing = False
         self.first_load = True
         self.temp_audio_file = None
-        self.loading_worker = None  # Theo dõi worker hiện tại
+        self.loading_worker = None
         
         self.setupUI()
         
@@ -42,8 +45,8 @@ class DropAreaLabel(QLabel):
         self.player.positionChanged.connect(self.position_changed)
         self.player.durationChanged.connect(self.duration_changed)
 
-        self.seekbar.sliderPressed.connect(self.on_seekbar_pressed)  
-        self.seekbar.sliderReleased.connect(self.on_seekbar_released)  
+        self.seekbar.sliderPressed.connect(self.on_seekbar_pressed)
+        self.seekbar.sliderReleased.connect(self.on_seekbar_released)
         self.seekbar.valueChanged.connect(self.on_seekbar_value_changed)
 
         self.setup_shortcuts()
@@ -52,24 +55,24 @@ class DropAreaLabel(QLabel):
         setupUI(self)
 
     def set_audio_file(self, file_path):
-        # Dừng và hủy worker cũ nếu đang chạy
         if self.loading_worker and self.loading_worker.isRunning():
             self.loading_worker.terminate()
             self.loading_worker.wait()
             self.loading_worker = None
         
-        # Reset player an toàn
         self.player.stop()
         self.player.setMedia(QMediaContent())
         self.player.blockSignals(True)
         
-        # Xử lý file tạm trước khi tạo file mới
         if self.temp_audio_file:
             QTimer.singleShot(100, self._clear_temp_file)
         
         self.original_file_path = file_path
         self.seekbar.setEnabled(False)
         self.stacked_widget.setCurrentIndex(1)
+        
+        if self.audio_data_manager and self.allow_drop:  # Lưu tệp vào AudioDataManager nếu là input
+            self.audio_data_manager.set_audio_file(file_path)
         
         if self.first_load:
             self.loading_overlay.show_loading()
@@ -79,16 +82,10 @@ class DropAreaLabel(QLabel):
                 self.loading_worker = AudioLoadWorker(file_path)
                 self.loading_worker.finished.connect(self.on_audio_loaded)
                 self.loading_worker.start()
-                # Bật nút tua cho file âm thanh
-                self.back_btn.setEnabled(True)
-                self.forward_btn.setEnabled(True)
             elif is_video_file(file_path):
                 self.loading_worker = VideoLoadWorker(file_path)
                 self.loading_worker.finished.connect(self.on_video_audio_loaded)
                 self.loading_worker.start()
-                # Vô hiệu hóa nút tua cho video
-                self.back_btn.setEnabled(False)
-                self.forward_btn.setEnabled(False)
             else:
                 print(f"Unsupported file format: {file_path}")
                 self.loading_overlay.hide_loading()
@@ -123,7 +120,7 @@ class DropAreaLabel(QLabel):
     def on_video_audio_loaded(self, temp_audio_path, data, duration_ms):
         if temp_audio_path:
             self.temp_audio_file = temp_audio_path
-            self.temp_file_updated.emit(temp_audio_path)  # Báo cho Video2AudioPage
+            self.temp_file_updated.emit(temp_audio_path)
             self.player.setMedia(QMediaContent(QUrl.fromLocalFile(temp_audio_path)))
             if data:
                 waveform_data, sr = data
@@ -137,18 +134,28 @@ class DropAreaLabel(QLabel):
         self.file_dropped.emit(self.original_file_path)
 
     def dragEnterEvent(self, event):
+        if not self.allow_drop:  # Chặn kéo nếu không cho phép
+            event.ignore()
+            return
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
             if any(is_audio_file(url.toLocalFile()) or is_video_file(url.toLocalFile()) for url in urls):
                 event.acceptProposedAction()
 
     def dropEvent(self, event):
+        if not self.allow_drop:  # Chặn thả nếu không cho phép
+            return
         urls = event.mimeData().urls()
         for url in urls:
             file_path = url.toLocalFile()
             if is_audio_file(file_path) or is_video_file(file_path):
                 self.set_audio_file(file_path)
                 break
+
+    def load_shared_audio(self):
+        """Tải tệp âm thanh từ AudioDataManager nếu có."""
+        if self.audio_data_manager and self.audio_data_manager.get_audio_file():
+            self.set_audio_file(self.audio_data_manager.get_audio_file())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -181,6 +188,12 @@ class DropAreaLabel(QLabel):
             self.play_btn.setIcon(self.play_icon)
             self.is_playing = False
             self.waveform.set_playing(False)
+            if state == QMediaPlayer.StoppedState:
+                self.update_timer.stop()
+                duration = self.player.duration()
+                if duration > 0:
+                    self.current_time.setText(self.total_time.text())
+                    self.seekbar.setValue(duration)
 
     def update_position(self):
         if not self.seekbar.isSliderDown():
@@ -206,37 +219,38 @@ class DropAreaLabel(QLabel):
             self.current_time.setText(format_time(position))
 
     def duration_changed(self, duration):
-        if not self.temp_audio_file:  # Chỉ dùng duration từ QMediaPlayer cho audio
+        if not self.temp_audio_file:
             print(f"QMediaPlayer duration: {duration} ms ({duration // 1000} seconds)")
             self.seekbar.setRange(0, duration)
             self.total_time.setText(format_time(duration))
 
     def seek_position(self, position):
+        duration = self.player.duration()
+        if position > duration:
+            position = duration
         self.player.setPosition(position)
 
     def on_seekbar_pressed(self):
-        """Tạm dừng âm thanh khi bắt đầu kéo seekbar."""
         if self.player.state() == QMediaPlayer.PlayingState:
             self.player.pause()
-            self.was_playing = True  # Lưu trạng thái phát trước khi kéo
+            self.was_playing = True
         else:
             self.was_playing = False
 
     def on_seekbar_released(self):
-        """Tiếp tục phát (nếu đang phát trước đó) khi thả seekbar."""
         position = self.seekbar.value()
         self.player.setPosition(position)
         if self.was_playing:
             self.player.play()
 
     def on_seekbar_value_changed(self, value):
-        """Cập nhật thời gian và vị trí sóng khi kéo seekbar."""
-        if self.seekbar.isSliderDown():  # Chỉ cập nhật khi đang kéo
+        if self.seekbar.isSliderDown():
             self.player.setPosition(value)
-            self.current_time.setText(format_time(value))
+            actual_position = self.player.position()
+            self.current_time.setText(format_time(actual_position))
             duration = self.player.duration()
             if duration > 0:
-                progress = (value / duration) * 100
+                progress = (actual_position / duration) * 100
                 self.waveform.set_progress(progress)
 
     def resizeEvent(self, event):
@@ -248,29 +262,18 @@ class DropAreaLabel(QLabel):
         self.player.setPosition(new_position)
 
     def setup_shortcuts(self):
-        """Thiết lập các phím tắt."""
-        # Phím Space: Phát/Tạm dừng
         self.shortcut_space = QShortcut(QKeySequence(Qt.Key_Space), self)
         self.shortcut_space.activated.connect(self.toggle_playback)
-
-        # Phím Left: Lùi 5 giây
         self.shortcut_left = QShortcut(QKeySequence(Qt.Key_Left), self)
         self.shortcut_left.activated.connect(lambda: self.seek_relative(-5000))
-
-        # Phím Right: Tiến 5 giây
         self.shortcut_right = QShortcut(QKeySequence(Qt.Key_Right), self)
         self.shortcut_right.activated.connect(lambda: self.seek_relative(5000))
-
-        # Phím Home: Chuyển đến đầu
         self.shortcut_home = QShortcut(QKeySequence(Qt.Key_Home), self)
         self.shortcut_home.activated.connect(lambda: self.seek_position(0))
-
-        # Phím End: Chuyển đến cuối
         self.shortcut_end = QShortcut(QKeySequence(Qt.Key_End), self)
         self.shortcut_end.activated.connect(self.seek_to_end)
 
     def seek_to_end(self):
-        """Chuyển đến cuối tệp âm thanh/video."""
         duration = self.player.duration()
         if duration > 0:
             self.seek_position(duration)
@@ -282,5 +285,4 @@ class DropAreaLabel(QLabel):
         self.seekbar.setValue(0)
         self.current_time.setText("00:00")
         self.total_time.setText("00:00")
-        self.waveform.clear_waveform()
         self._clear_temp_file()

@@ -9,8 +9,9 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.separate.worker_noise import NoiseWorker
 
 class NoisePage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager
         self.selected_audio_file = None
         self.initUI()
 
@@ -22,72 +23,72 @@ class NoisePage(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(25, 15, 25, 25)
 
-        top_bar = FunctionBar("noise reduction", font_family, self)
-        layout.addLayout(top_bar)
+        # Top bar
+        layout.addLayout(FunctionBar("noise reduction", font_family, self))
         layout.addSpacing(10)
 
+        # Player layout for Before and After
         player_layout = QHBoxLayout()
 
-        # Trình phát Before
+        # Before player (draggable)
         before_layout = QVBoxLayout()
-        self.audio_player_before = DropAreaLabel()
+        self.audio_player_before = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player_before.setFixedHeight(220)
         self.audio_player_before.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player_before.file_dropped.connect(self.on_file_dropped)
-        before_label = QLabel("before")
-        before_label.setFont(QFont(font_family, 12))
-        before_label.setStyleSheet("color: white;")
-        before_label.setAlignment(Qt.AlignCenter)
+        before_label = self._create_label("before", font_family)
         before_layout.addWidget(self.audio_player_before)
         before_layout.addWidget(before_label)
 
         player_layout.addLayout(before_layout)
         player_layout.addSpacing(10)
 
-        # Trình phát After
+        # After player (non-draggable)
         after_layout = QVBoxLayout()
-        self.audio_player_after = DropAreaLabel()
+        self.audio_player_after = DropAreaLabel(self.audio_data_manager, allow_drop=False)
         self.audio_player_after.setFixedHeight(220)
         self.audio_player_after.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        after_label = QLabel("after")
-        after_label.setFont(QFont(font_family, 12))
-        after_label.setStyleSheet("color: white;")
-        after_label.setAlignment(Qt.AlignCenter)
+        after_label = self._create_label("after", font_family)
         after_layout.addWidget(self.audio_player_after)
         after_layout.addWidget(after_label)
 
         player_layout.addLayout(after_layout)
-
         layout.addLayout(player_layout)
         layout.addStretch()
 
+        # Button layout
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
-        self.open_location_btn = QPushButton("Open file location")
-        self.open_location_btn.setFixedSize(180, 40)
-        self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
-            QPushButton:hover { background-color: #292d47; }
-        """)
-        self.open_location_btn.clicked.connect(self.open_file_location)
+        self.open_location_btn = self._create_button("Open file location", font_family, 180, self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
-
         button_layout.addSpacing(10)
 
-        self.export_btn = QPushButton("Export")
-        self.export_btn.setFixedSize(100, 40)
-        self.export_btn.setFont(QFont(font_family, 13))
-        self.export_btn.setStyleSheet("""
-            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
-            QPushButton:hover { background-color: #292d47; }
-        """)
-        self.export_btn.clicked.connect(self.export_audio)
+        self.export_btn = self._create_button("Export", font_family, 100, self.export_audio)
         button_layout.addWidget(self.export_btn)
 
         layout.addLayout(button_layout)
         self.setStyleSheet("background-color: #282a32;")
+
+    def _create_label(self, text, font_family):
+        """Helper method to create a styled label"""
+        label = QLabel(text)
+        label.setFont(QFont(font_family, 12))
+        label.setStyleSheet("color: white;")
+        label.setAlignment(Qt.AlignCenter)
+        return label
+
+    def _create_button(self, text, font_family, width, callback):
+        """Helper method to create a styled button"""
+        btn = QPushButton(text)
+        btn.setFixedSize(width, 40)
+        btn.setFont(QFont(font_family, 13))
+        btn.setStyleSheet("""
+            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
+            QPushButton:hover { background-color: #292d47; }
+        """)
+        btn.clicked.connect(callback)
+        return btn
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
@@ -125,12 +126,15 @@ class NoisePage(QWidget):
         self.render_window.updateTimeRemaining(time_remaining)
 
     def on_export_finished(self, output_file):
+        print(f"Export finished, output file: {output_file}")
         self.render_window.updateProgress(100)
         self.render_window.updateStatus("Export complete!")
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
+
         self.audio_player_after.set_audio_file(output_file)
+        self.audio_data_manager.set_audio_file(output_file)
         self.export_btn.setEnabled(True)
 
     def on_export_error(self, error_message):

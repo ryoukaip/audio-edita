@@ -10,8 +10,9 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.edit.worker_volume import VolumeWorker
 
 class VolumePage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager 
         self.selected_audio_file = None
         self.initUI()
     
@@ -27,7 +28,8 @@ class VolumePage(QWidget):
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        self.audio_player = DropAreaLabel()
+        # File drop area (input, cho phép thả và chia sẻ)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -77,10 +79,10 @@ class VolumePage(QWidget):
         """)
         self.export_btn.clicked.connect(self.export_audio)
         button_layout.addWidget(self.export_btn)
-
         layout.addLayout(button_layout)
         
         self.setStyleSheet("background-color: #282a32;")
+        self.audio_player.load_shared_audio()
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
@@ -124,12 +126,15 @@ class VolumePage(QWidget):
         self.render_window.updateTimeRemaining(time_remaining)
 
     def on_export_finished(self, output_file):
+        print(f"Export finished, output file: {output_file}")
         self.render_window.updateProgress(100)
         self.render_window.updateStatus("Export complete!")
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
+
         self.audio_player.set_audio_file(output_file)
+        self.audio_data_manager.set_audio_file(output_file) 
         self.export_btn.setEnabled(True)
 
     def on_export_error(self, error_message):

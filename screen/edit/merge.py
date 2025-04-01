@@ -1,3 +1,4 @@
+# screen/edit/merge.py
 import os
 import librosa
 import soundfile as sf
@@ -12,10 +13,11 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.edit.worker_merge import MergeWorker
 
 class MergePage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
-        self.selected_audio_file1 = None
-        self.selected_audio_file2 = None
+        self.audio_data_manager = audio_data_manager  # Thêm AudioDataManager
+        self.selected_audio_file_1 = None  # Sửa tên biến cho đồng bộ
+        self.selected_audio_file_2 = None  # Sửa tên biến cho đồng bộ
         self.initUI()
     
     def initUI(self):
@@ -32,19 +34,21 @@ class MergePage(QWidget):
 
         player_layout = QHBoxLayout()
         
-        self.audio_player1 = DropAreaLabel()
-        self.audio_player1.setFixedHeight(220)
-        self.audio_player1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.audio_player1.file_dropped.connect(self.on_file1_dropped)
-        player_layout.addWidget(self.audio_player1)
+        # Trình phát input 1 (cho phép thả và chia sẻ)
+        self.audio_player_1 = DropAreaLabel(self.audio_data_manager, allow_drop=True)
+        self.audio_player_1.setFixedHeight(220)
+        self.audio_player_1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.audio_player_1.file_dropped.connect(self.on_file_1_dropped)
+        player_layout.addWidget(self.audio_player_1)
 
         player_layout.addSpacing(10)
 
-        self.audio_player2 = DropAreaLabel()
-        self.audio_player2.setFixedHeight(220)
-        self.audio_player2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.audio_player2.file_dropped.connect(self.on_file2_dropped)
-        player_layout.addWidget(self.audio_player2)
+        # Trình phát input 2 (cho phép thả)
+        self.audio_player_2 = DropAreaLabel(self.audio_data_manager, allow_drop=True)
+        self.audio_player_2.setFixedHeight(220)
+        self.audio_player_2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.audio_player_2.file_dropped.connect(self.on_file_2_dropped)
+        player_layout.addWidget(self.audio_player_2)
 
         layout.addLayout(player_layout)
         layout.addStretch()
@@ -90,21 +94,24 @@ class MergePage(QWidget):
         
         self.setStyleSheet("background-color: #282a32;")
 
-    def on_file1_dropped(self, file_path):
-        print(f"File 1 dropped: {file_path}")
-        self.selected_audio_file1 = file_path
+        # Tải tệp âm thanh từ AudioDataManager cho trình phát 1 khi khởi tạo
+        self.audio_player_1.load_shared_audio()
 
-    def on_file2_dropped(self, file_path):
+    def on_file_1_dropped(self, file_path):
+        print(f"File 1 dropped: {file_path}")
+        self.selected_audio_file_1 = file_path
+
+    def on_file_2_dropped(self, file_path):
         print(f"File 2 dropped: {file_path}")
-        self.selected_audio_file2 = file_path
+        self.selected_audio_file_2 = file_path
 
     def export_audio(self):
-        if not self.selected_audio_file1 or not self.selected_audio_file2:
+        if not self.selected_audio_file_1 or not self.selected_audio_file_2:
             noti_window = NotiWindow()
             noti_window.update_message("Please drop two audio files to merge")
             return
 
-        print(f"Starting merge for files: {self.selected_audio_file1} and {self.selected_audio_file2}")
+        print(f"Starting merge for files: {self.selected_audio_file_1} and {self.selected_audio_file_2}")
         
         self.render_window = RenderWindow(None)
         self.render_window.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -118,7 +125,7 @@ class MergePage(QWidget):
 
         self.export_btn.setEnabled(False)
 
-        self.worker = MergeWorker(self.selected_audio_file1, self.selected_audio_file2)
+        self.worker = MergeWorker(self.selected_audio_file_1, self.selected_audio_file_2)
         self.worker.progress_updated.connect(self.update_progress)
         self.worker.finished.connect(self.on_export_finished)
         self.worker.error.connect(self.on_export_error)
@@ -130,11 +137,15 @@ class MergePage(QWidget):
         self.render_window.updateTimeRemaining(time_remaining)
 
     def on_export_finished(self, output_file):
+        print(f"Export finished, output file: {output_file}")
         self.render_window.updateProgress(100)
         self.render_window.updateStatus("Merge complete!")
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
+        # Ghi đè tệp đầu ra vào AudioDataManager và hiển thị trên audio_player_1
+        self.audio_player_1.set_audio_file(output_file)
+        self.audio_data_manager.set_audio_file(output_file)  # Ghi đè AudioDataManager
         self.export_btn.setEnabled(True)
 
     def on_export_error(self, error_message):

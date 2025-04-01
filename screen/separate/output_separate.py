@@ -1,8 +1,7 @@
 import os
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePolicy, QVBoxLayout, QScrollArea)
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
-from screen.function.system.function_openlocation import open_file_location
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase, QDesktopServices
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.system.function_scrollarea import CustomScrollArea
 
@@ -58,7 +57,7 @@ class OutputSeparateWidget(QWidget):
                 background-color: #474f7a;
             }
         """)
-        self.open_location_btn.clicked.connect(open_file_location)
+        self.open_location_btn.clicked.connect(self.open_file_location)
 
         # Add Back button
         done_btn = QPushButton("Back")
@@ -198,6 +197,13 @@ class OutputSeparateWidget(QWidget):
         # Lấy vị trí của stretch (item cuối cùng)
         stretch_index = layout.count() - 1
         layout.insertLayout(stretch_index, track_layout)
+
+    def open_file_location(self):
+        documents_path = os.path.join(os.path.expanduser("~"), "Documents")
+        output_dir = os.path.join(documents_path, "audio-edita", "separate")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        QDesktopServices.openUrl(QUrl.fromLocalFile(output_dir))
 
     def go_back(self):
         main_window = self.window()

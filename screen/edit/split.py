@@ -1,3 +1,4 @@
+# screen/edit/split.py
 import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
@@ -9,8 +10,9 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.edit.worker_split import SplitWorker
 
 class SplitPage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager  # Thêm AudioDataManager
         self.selected_audio_file = None
         self.initUI()
     
@@ -26,7 +28,8 @@ class SplitPage(QWidget):
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        self.audio_player = DropAreaLabel()
+        # Trình phát input (cho phép thả và chia sẻ)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -93,9 +96,13 @@ class SplitPage(QWidget):
         layout.addLayout(button_layout)
         self.setStyleSheet("background-color: #282a32;")
 
+        # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
+        self.audio_player.load_shared_audio()
+
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
         self.selected_audio_file = file_path
+        # Tệp sẽ tự động được lưu vào AudioDataManager trong DropAreaLabel
 
     def update_split_time(self, time_str):
         self.time_label.setText(time_str)
@@ -151,6 +158,10 @@ class SplitPage(QWidget):
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
         print(f"Files exported successfully: {output_file1}, {output_file2}")
+        
+        # Lấy tệp âm thanh đầu tiên (output_file1) để hiển thị và chia sẻ
+        self.audio_player.set_audio_file(output_file1)
+        self.audio_data_manager.set_audio_file(output_file1)  # Cập nhật AudioDataManager
 
     def on_export_error(self, error_message):
         self.render_window.close()

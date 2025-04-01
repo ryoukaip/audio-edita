@@ -9,8 +9,9 @@ from screen.function.system.function_renderwindow import RenderWindow
 from screen.function.system.function_notiwindow import NotiWindow
 
 class VoicePage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager 
         self.selected_audio_file = None
         self.output_file = None
         self.is_exporting = False
@@ -29,7 +30,8 @@ class VoicePage(QWidget):
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        self.audio_player = DropAreaLabel()
+        # File drop area (input, cho phép thả và chia sẻ)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -87,7 +89,9 @@ class VoicePage(QWidget):
         self.export_btn.clicked.connect(self.start_export)
         button_layout.addWidget(self.export_btn)
         layout.addLayout(button_layout)
+
         self.setStyleSheet("background-color: #282a32;")
+        self.audio_player.load_shared_audio()
 
     def on_file_dropped(self, file_path):
         if file_path.lower().endswith(('.wav', '.mp3', '.flac')):
@@ -191,27 +195,18 @@ class VoicePage(QWidget):
     def on_export_finished(self, output_file):
         self.output_file = output_file
         print(f"Export completed: {output_file}")
-        
-        # Cập nhật render window
         self.render_window.updateProgress(100)
         self.render_window.updateStatus("Export complete!")
         self.render_window.updateTimeRemaining("Done!")
-        
-        # Cập nhật cấu hình đã xuất cuối cùng
+        self.open_file_location()
         self.last_exported_config = (self.selected_audio_file, self.selected_voice_type)
-        
-        # Đóng render window sau 1 giây
         QTimer.singleShot(1000, self.render_window.close)
         
-        # Cập nhật trình phát với file đã xuất mới
         self.audio_player.set_audio_file(output_file)
+        self.audio_data_manager.set_audio_file(output_file) 
         
-        # Đánh dấu không còn đang xuất
         self.is_exporting = False
         self.export_btn.setEnabled(True)
-        
-        # Tự động mở thư mục chứa file đã xuất
-        self.open_file_location()
 
     def on_export_error(self, error_message):
         self.render_window.close()

@@ -1,3 +1,4 @@
+# screen/edit/equalizer.py
 import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBoxLayout, QApplication
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
@@ -10,28 +11,26 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.edit.worker_equalizer import EqualizerWorker 
 
 class EqualizerPage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager 
         self.selected_audio_file = None
         self.initUI()
 
     def initUI(self):
-        # Add font
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
 
-        # Main layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(25, 15, 25, 25)
 
-        # Add function bar
         top_bar = FunctionBar("equalizer", font_family, self)
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        # File drop area
-        self.audio_player = DropAreaLabel()
+        # File drop area (input, cho phép thả và chia sẻ)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -44,10 +43,8 @@ class EqualizerPage(QWidget):
         layout.addWidget(self.equalizer_controls)
         layout.addSpacing(15)
 
-        # Stretch to push buttons to the bottom
         layout.addStretch()
 
-        # Button layout
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
@@ -84,15 +81,15 @@ class EqualizerPage(QWidget):
         """)
         self.export_btn.clicked.connect(self.export_audio)
         button_layout.addWidget(self.export_btn)
-
         layout.addLayout(button_layout)
 
-        # Set background style
         self.setStyleSheet("background-color: #282a32;")
+        self.audio_player.load_shared_audio()
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
         self.selected_audio_file = file_path
+        # Tệp sẽ tự động được lưu vào AudioDataManager trong DropAreaLabel
 
     def handle_eq_change(self, value):
         # Placeholder for real-time preview if needed
@@ -149,7 +146,9 @@ class EqualizerPage(QWidget):
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
-        self.audio_player.set_audio_file(output_file)
+        
+        self.audio_player.set_audio_file(output_file)  
+        self.audio_data_manager.set_audio_file(output_file) 
         self.export_btn.setEnabled(True)
 
     def on_export_error(self, error_message):

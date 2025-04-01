@@ -9,8 +9,9 @@ from screen.function.system.function_notiwindow import NotiWindow
 from screen.edit.worker_trim import TrimWorker
 
 class TrimPage(QWidget):
-    def __init__(self):
+    def __init__(self, audio_data_manager):
         super().__init__()
+        self.audio_data_manager = audio_data_manager
         self.selected_audio_file = None
         self.active_label = "to"  # Mặc định ô "to" được chọn để cập nhật thời gian
         self.initUI()
@@ -27,7 +28,8 @@ class TrimPage(QWidget):
         layout.addLayout(top_bar)
         layout.addSpacing(10)
 
-        self.audio_player = DropAreaLabel()
+        # File drop area (input, cho phép thả và chia sẻ)
+        self.audio_player = DropAreaLabel(self.audio_data_manager, allow_drop=True)
         self.audio_player.setFixedHeight(220)
         self.audio_player.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.audio_player.file_dropped.connect(self.on_file_dropped)
@@ -128,6 +130,9 @@ class TrimPage(QWidget):
 
         layout.addLayout(button_layout)
         self.setStyleSheet("background-color: #282a32;")
+
+        # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
+        self.audio_player.load_shared_audio()
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")
@@ -244,12 +249,14 @@ class TrimPage(QWidget):
         self.render_window.updateTimeRemaining(time_remaining)
 
     def on_export_finished(self, output_file):
+        print(f"Export finished, output file: {output_file}")
         self.render_window.updateProgress(100)
         self.render_window.updateStatus("Export complete!")
         self.render_window.updateTimeRemaining("Done!")
         self.open_file_location()
         QTimer.singleShot(1000, self.render_window.close)
-        print(f"File exported successfully: {output_file}")
+        self.audio_player.set_audio_file(output_file)  # Cập nhật trình phát với tệp đầu ra
+        self.audio_data_manager.set_audio_file(output_file)
 
     def on_export_error(self, error_message):
         self.render_window.close()

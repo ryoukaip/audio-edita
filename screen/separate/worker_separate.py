@@ -8,9 +8,8 @@ class SpleeterSeparator(QThread):
     finished = pyqtSignal(str)  # Signal when separation is complete
     error = pyqtSignal(str)     # Signal for errors
 
-    def __init__(self, input_file, output_path, stems=2, high_quality=False):
+    def __init__(self, input_file, output_path, stems=2, high_quality=True):  # Mặc định high_quality=True
         super().__init__()
-        # Đảm bảo các đường dẫn được xử lý đúng với UTF-8
         self.input_file = ensure_unicode_path(input_file)
         self.output_path = ensure_unicode_path(output_path)
         self.stems = stems
@@ -46,21 +45,21 @@ class SpleeterSeparator(QThread):
 
             self.progress.emit("Loading audio file")
 
-            # Construct command as a list (don't join as string)
+            # Construct command as a list
             command = [
-                sys.executable,  # Use Python executable
-                "-m", 
-                "spleeter", 
+                sys.executable,
+                "-m",
+                "spleeter",
                 "separate",
-                self.input_file,  # Don't quote the path
-                "-p", 
+                self.input_file,
+                "-p",
                 stem_config,
-                "-o", 
-                self.output_path  # Don't quote the path
+                "-o",
+                self.output_path
             ]
 
-            if self.high_quality:
-                command.extend(["-b", "320k"])
+            # Always enable high quality (bitrate 320k)
+            command.extend(["-b", "320k"])
 
             self.progress.emit(f"Running command: {' '.join(command)}")
             
@@ -70,8 +69,8 @@ class SpleeterSeparator(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
-                encoding='utf-8',  # Thêm encoding UTF-8
-                errors='replace'   # Thay thế ký tự không đọc được
+                encoding='utf-8',
+                errors='replace'
             )
 
             # Monitor process output
@@ -82,11 +81,9 @@ class SpleeterSeparator(QThread):
                         break
                     if output:
                         self.progress.emit(output.strip())
-                        # Thêm các thông báo chi tiết hơn dựa trên trạng thái
                         if "Loading tensorflow model" in output:
                             self.progress.emit("Loading AI separation model")
                 except UnicodeDecodeError:
-                    # Xử lý lỗi decode nếu xảy ra
                     self.progress.emit("Could not decode some characters in output")
 
             # Check for errors
@@ -109,14 +106,12 @@ def ensure_unicode_path(path):
     """
     if isinstance(path, str):
         try:
-            # Try to normalize the path with proper encoding
             return os.path.normpath(path)
         except:
-            # If normalization fails, try to manually fix encoding
             return path.encode('utf-8', 'ignore').decode('utf-8', 'ignore')
     return path
 
-def start_separation(input_file, output_dir, stems=2, high_quality=False):
+def start_separation(input_file, output_dir, stems=2, high_quality=True):  # Mặc định high_quality=True
     """
     Start the audio separation process
     
@@ -124,13 +119,12 @@ def start_separation(input_file, output_dir, stems=2, high_quality=False):
         input_file (str): Path to input audio file
         output_dir (str): Output directory path
         stems (int): Number of stems (2, 4, or 5)
-        high_quality (bool): Use high quality mode if True
+        high_quality (bool): Use high quality mode (default: True)
     
     Returns:
         SpleeterSeparator: The separator thread instance
     """
     try:
-        # Đảm bảo đường dẫn hợp lệ trước khi kiểm tra
         input_file = ensure_unicode_path(input_file)
         
         if not os.path.exists(input_file):

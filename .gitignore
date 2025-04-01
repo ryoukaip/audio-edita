@@ -9,3 +9,4 @@ __pycache__/
 *.exe
 
 !fpcalc.exe
+temp_standardized_audio.mp3
