@@ -22,6 +22,7 @@ class CustomTitleBar(QWidget):
 
         # App title
         app_title = QLabel("audio edita")
+        app_title.setStyleSheet("color: white;")
         app_title.setFont(QFont(self.font_family, 14, QFont.Bold))
 
         # Control buttons

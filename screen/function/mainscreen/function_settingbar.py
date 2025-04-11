@@ -5,7 +5,7 @@ from screen.setting.setting_about import AboutTab
 from screen.setting.setting_theme import ThemeTab
 
 class SettingBar(QWidget):
-    theme_changed = pyqtSignal(dict)  # Tín hiệu để thông báo theme thay đổi
+    theme_changed = pyqtSignal(dict)  
 
     def __init__(self, parent=None, font_family="Arial"):
         super().__init__(parent)

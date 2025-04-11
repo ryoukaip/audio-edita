@@ -13,6 +13,9 @@ class MenuToolPage(QWidget):
         self.initUI()
     
     def initUI(self):
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setStyleSheet("background: transparent;")
+
         # Thêm font cho ứng dụng
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]

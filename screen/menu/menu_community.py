@@ -9,13 +9,16 @@ class MenuCommunityPage(QWidget):
         self.initUI()
 
     def initUI(self):
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setStyleSheet("background: transparent;")
+
         # Thêm font cho ứng dụng
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0] if font_id != -1 else "Arial"
         self.setFont(QFont(font_family))
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(15)
 
         title_subtitle_layout = QVBoxLayout()

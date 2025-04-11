@@ -4,7 +4,6 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtCore import Qt, QSize, QPoint
 
-# Import AudioDataManager
 from screen.function.system.function_datamanager import AudioDataManager
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 
@@ -54,11 +53,16 @@ class AudioEditorUI(QMainWindow):
         self.drag_pos = QPoint()
         self.is_maximized = False
         self.page_mapping = {}
-        self.previous_widget = None  # Lưu trữ màn hình trước đó
-        
-        # Khởi tạo AudioDataManager
+        self.previous_widget = None
+        self.current_theme = {
+            "primary": "#98a4e6",
+            "secondary": "#7d8bd4",
+            "background": "#474f7a",  # Not used for main window
+            "highlight": "#6574c6",
+            "shadow": "#3a4062",
+            "dark": "#292d47"
+        }
         self.audio_data_manager = AudioDataManager()
-        
         self.initUI()
 
     def initUI(self):
@@ -66,15 +70,15 @@ class AudioEditorUI(QMainWindow):
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
 
-        self.setWindowTitle("audio edita")
         self.setGeometry(100, 100, 800, 600)
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setStyleSheet("background-color: #1c1b1f; color: white;")
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        
+
         self.center_window()
 
         central_widget = QWidget()
+        # Set solid background for central_widget
+        central_widget.setStyleSheet("background-color: #1c1b1f;")
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -86,18 +90,19 @@ class AudioEditorUI(QMainWindow):
         self.title_bar = CustomTitleBar(self, font_family)
         self.sidebar = CustomSidebar(self, font_family)
         self.sidebar.buttonClicked.connect(self.handle_sidebar_button)
-        
+
         self.stack = QStackedWidget()
-        
-        # Truyền AudioDataManager vào các trang
+
         self.add_page("MenuTool", MenuToolPage())
         self.add_page("MenuEdit", MenuEditPage())
         self.add_page("MenuSeparate", MenuSeparatePage())
         self.add_page("MenuCheck", MenuCheckPage())
         self.add_page("MenuDownload", MenuDownloadPage())
         self.add_page("MenuCommunity", MenuCommunityPage())
-        self.add_page("MenuSetting", MenuSettingPage())
-        
+        setting_page = MenuSettingPage()
+        setting_page.theme_changed.connect(self.update_theme)
+        self.add_page("MenuSetting", setting_page)
+
         self.add_page("Equalizer", EqualizerPage(self.audio_data_manager))
         self.add_page("Trim", TrimPage(self.audio_data_manager))
         self.add_page("Merge", MergePage(self.audio_data_manager))
@@ -127,22 +132,17 @@ class AudioEditorUI(QMainWindow):
 
         content_layout.addWidget(self.sidebar, 1)
         content_layout.addWidget(self.stack, 4)
-        self.stack.setStyleSheet("""
-            background-color: #282a32;
-            border-top-left-radius: 22px;
-        """)
 
         main_layout.addWidget(self.title_bar)
         main_layout.addLayout(content_layout)
 
         self.sidebar.set_active_button(self.sidebar.tool_btn)
         self.is_maximized = False
-        
-        # Khi chuyển trang, xử lý hủy và tải lại tệp âm thanh
         self.stack.currentChanged.connect(self.on_screen_changed)
 
+        self.apply_theme()
+
     def add_page(self, page_id, page_widget):
-        """Thêm một trang vào stack và lưu vào từ điển ánh xạ."""
         index = self.stack.addWidget(page_widget)
         self.page_mapping[page_id] = page_widget
 
@@ -164,7 +164,6 @@ class AudioEditorUI(QMainWindow):
         self.title_bar.toggleMaximize()
 
     def handle_sidebar_button(self, index, button):
-        """Xử lý sự kiện nhấn nút sidebar, sử dụng định danh thay vì chỉ số."""
         if button == self.sidebar.tool_btn:
             page_id = "MenuTool"
         elif button == self.sidebar.community_btn:
@@ -172,43 +171,43 @@ class AudioEditorUI(QMainWindow):
         elif button == self.sidebar.setting_btn:
             page_id = "MenuSetting"
         else:
-            return 
-        
+            return
         page_widget = self.page_mapping.get(page_id)
         if page_widget:
             self.stack.setCurrentWidget(page_widget)
         self.sidebar.set_active_button(button)
 
     def on_screen_changed(self, index):
-        """Xử lý khi màn hình thay đổi: hủy tệp âm thanh của màn hình cũ và tải lại cho màn hình mới."""
-        # Lấy widget hiện tại
         current_widget = self.stack.widget(index)
-        
-        # Nếu có màn hình trước đó và khác với màn hình hiện tại, hủy tệp âm thanh cũ
         if self.previous_widget and self.previous_widget != current_widget:
             old_player = getattr(self.previous_widget, 'audio_player', None) or \
                         getattr(self.previous_widget, 'audio_player_input', None)
             if old_player and isinstance(old_player, DropAreaLabel):
-                # Dừng phát và xóa media từ QMediaPlayer
                 old_player.player.stop()
                 old_player.player.setMedia(QMediaContent())
-                # Xóa tệp tạm nếu có
                 old_player._clear_temp_file()
-                # Reset giao diện về trạng thái ban đầu (nếu cần)
                 old_player.clear()
-
-        # Tải lại tệp âm thanh cho màn hình hiện tại nếu cần
         if hasattr(current_widget, 'audio_player') or hasattr(current_widget, 'audio_player_input'):
             player = getattr(current_widget, 'audio_player', None) or \
                     getattr(current_widget, 'audio_player_input', None)
             if player and isinstance(player, DropAreaLabel):
                 player.load_shared_audio()
-
-        # Cập nhật widget trước đó
         self.previous_widget = current_widget
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = AudioEditorUI()
-    window.show()
-    sys.exit(app.exec_())
+    def update_theme(self, colors):
+        self.current_theme = colors
+        self.apply_theme()
+        for page_id, page_widget in self.page_mapping.items():
+            if hasattr(page_widget, 'set_theme'):
+                page_widget.set_theme(colors)
+
+    def apply_theme(self):
+        self.stack.setStyleSheet(f"""
+            QStackedWidget {{
+                background-color: #282a32;
+                border-top-left-radius: 22px;
+            }}
+        """)
+        self.sidebar.set_theme(self.current_theme)
+        if hasattr(self.title_bar, 'set_theme'):
+            self.title_bar.set_theme(self.current_theme)
