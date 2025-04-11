@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt
 class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
-        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Đặt kích thước cố định cho nút
         self.setFixedSize(110, 80)  # Đặt kích thước tối đa cố định
 
         # Load font Cabin-Bold
@@ -46,7 +45,8 @@ class IconButton(QPushButton):
 
         self.setLayout(layout)
 
-class MenuDownloadPage(QWidget):
+
+class MenuEditPage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -58,21 +58,8 @@ class MenuDownloadPage(QWidget):
         self.setFont(QFont(font_family))
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 50, 12, 12)
+        layout.setContentsMargins(12, 0, 12, 12)
         layout.setSpacing(15)
-        
-        title = QLabel("audio download")
-        title.setFont(QFont(font_family, 16))
-        title.setAlignment(Qt.AlignCenter)
-        subtitle = QLabel("choose a function to start")
-        subtitle.setFont(QFont(font_family, 12))
-        subtitle.setAlignment(Qt.AlignCenter)
-        
-        title_subtitle_layout = QVBoxLayout()
-        title_subtitle_layout.addWidget(title)
-        title_subtitle_layout.addWidget(subtitle)
-        title_subtitle_layout.setSpacing(2)
-        title_subtitle_layout.setAlignment(Qt.AlignCenter)
         
         # Grid Layout cho các nút
         container = QWidget()
@@ -81,120 +68,119 @@ class MenuDownloadPage(QWidget):
         grid.setSpacing(15)
 
         buttons = [
-            ("youtube", "./icon/video.png"), ("tiktok", "./icon/tiktok.png"),
-            ("facebook", "./icon/facebook.png"), ("instagram", "./icon/instagram.png"),
-            ("x", "./icon/x.png"), ("soundcloud", "./icon/soundcloud.png"),
-            ("bluesky", "./icon/bluesky.png"), ("tumblr", "./icon/tumblr.png"),
-            ("reddit", "./icon/reddit.png"), ("bilibili", "./icon/bilibili.png"),
+            ("equalizer", "./icon/equalizer.png"), ("trim", "./icon/trim.png"), 
+            ("merge", "./icon/merge.png"), ("split", "./icon/split.png"),
+            ("volume", "./icon/volume.png"), ("reverse", "./icon/reverse.png"), 
+            ("speed", "./icon/speed.png"), ("compress", "./icon/compress.png"),
+            ("convert", "./icon/convert.png"), ("voice", "./icon/voice.png")
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
-            if text == "youtube":
-                btn.clicked.connect(self.show_youtube_page)
-            elif text == "tiktok":
-                btn.clicked.connect(self.show_tiktok_page)
-            elif text == "facebook":
-                btn.clicked.connect(self.show_facebook_page)
-            elif text == "instagram":
-                btn.clicked.connect(self.show_instagram_page)
-            elif text == "x":
-                btn.clicked.connect(self.show_x_page)
-            elif text == "soundcloud":
-                btn.clicked.connect(self.show_soundcloud_page)
-            elif text == "bluesky":
-                btn.clicked.connect(self.show_bluesky_page)
-            elif text == "tumblr":
-                btn.clicked.connect(self.show_tumblr_page)
-            elif text == "reddit":
-                btn.clicked.connect(self.show_reddit_page)
-            elif text == "bilibili":
-                btn.clicked.connect(self.show_bilibili_page)
+            if text == "trim":
+                btn.clicked.connect(self.show_trim_page)
+            elif text == "equalizer":
+                btn.clicked.connect(self.show_equalizer_page)
+            elif text == "merge":
+                btn.clicked.connect(self.show_merge_page)
+            elif text == "split":
+                btn.clicked.connect(self.show_split_page)
+            elif text == "volume":
+                btn.clicked.connect(self.show_volume_page)
+            elif text == "reverse":
+                btn.clicked.connect(self.show_reverse_page)
+            elif text == "speed":
+                btn.clicked.connect(self.show_speed_page)
+            elif text == "compress":
+                btn.clicked.connect(self.show_compress_page)
+            elif text == "convert":
+                btn.clicked.connect(self.show_convert_page)
+            elif text == "voice":
+                btn.clicked.connect(self.show_voice_page)
             grid.addWidget(btn, *pos)
-        
-        container.setFixedWidth(650)
 
-        layout.addLayout(title_subtitle_layout)
-        layout.addWidget(container, alignment=Qt.AlignCenter)
+        container.setFixedWidth(650)
+      
+        layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_youtube_page(self):
+    def show_equalizer_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("YoutubeDownload")
+            page_widget = main_window.page_mapping.get("Equalizer")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_tiktok_page(self):
+    def show_trim_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("TiktokDownload")
+            page_widget = main_window.page_mapping.get("Trim")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_facebook_page(self):
+    def show_merge_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("FacebookDownload")
+            page_widget = main_window.page_mapping.get("Merge")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_instagram_page(self):
+    def show_split_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("InstagramDownload")
+            page_widget = main_window.page_mapping.get("Split")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_x_page(self):
+    def show_volume_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("XDownload")
+            page_widget = main_window.page_mapping.get("Volume")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_soundcloud_page(self):
+    def show_reverse_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("SoundcloudDownload")
+            page_widget = main_window.page_mapping.get("Reverse")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_bluesky_page(self):
+    def show_speed_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("BlueskyDownload")
+            page_widget = main_window.page_mapping.get("Speed")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_tumblr_page(self):
+    def show_compress_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("TumblrDownload")
+            page_widget = main_window.page_mapping.get("Compress")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_reddit_page(self):
+    def show_convert_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("RedditDownload")
+            page_widget = main_window.page_mapping.get("Convert")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_bilibili_page(self):
+    def show_voice_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("BilibiliDownload")
+            page_widget = main_window.page_mapping.get("Voice")
             if page_widget:
-                stack.setCurrentWidget(page_widget)        
+                stack.setCurrentWidget(page_widget)

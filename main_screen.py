@@ -8,11 +8,14 @@ from PyQt5.QtCore import Qt, QSize, QPoint
 from screen.function.system.function_datamanager import AudioDataManager
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 
-# Các import khác giữ nguyên
-from menu_edit import MenuEditPage
-from menu_separate import MenuSeparatePage
-from menu_check import MenuCheckPage
-from menu_download import MenuDownloadPage
+from screen.menu.menu_tool import MenuToolPage
+from screen.menu.menu_edit import MenuEditPage
+from screen.menu.menu_separate import MenuSeparatePage
+from screen.menu.menu_check import MenuCheckPage
+from screen.menu.menu_download import MenuDownloadPage
+from screen.menu.menu_community import MenuCommunityPage
+from screen.menu.menu_setting import MenuSettingPage
+
 from screen.edit.equalizer import EqualizerPage
 from screen.edit.trim import TrimPage
 from screen.edit.merge import MergePage
@@ -87,10 +90,14 @@ class AudioEditorUI(QMainWindow):
         self.stack = QStackedWidget()
         
         # Truyền AudioDataManager vào các trang
+        self.add_page("MenuTool", MenuToolPage())
         self.add_page("MenuEdit", MenuEditPage())
         self.add_page("MenuSeparate", MenuSeparatePage())
         self.add_page("MenuCheck", MenuCheckPage())
         self.add_page("MenuDownload", MenuDownloadPage())
+        self.add_page("MenuCommunity", MenuCommunityPage())
+        self.add_page("MenuSetting", MenuSettingPage())
+        
         self.add_page("Equalizer", EqualizerPage(self.audio_data_manager))
         self.add_page("Trim", TrimPage(self.audio_data_manager))
         self.add_page("Merge", MergePage(self.audio_data_manager))
@@ -128,7 +135,7 @@ class AudioEditorUI(QMainWindow):
         main_layout.addWidget(self.title_bar)
         main_layout.addLayout(content_layout)
 
-        self.sidebar.set_active_button(self.sidebar.edit_btn)
+        self.sidebar.set_active_button(self.sidebar.tool_btn)
         self.is_maximized = False
         
         # Khi chuyển trang, xử lý hủy và tải lại tệp âm thanh
@@ -158,14 +165,12 @@ class AudioEditorUI(QMainWindow):
 
     def handle_sidebar_button(self, index, button):
         """Xử lý sự kiện nhấn nút sidebar, sử dụng định danh thay vì chỉ số."""
-        if button == self.sidebar.edit_btn:
-            page_id = "MenuEdit"
-        elif button == self.sidebar.separate_btn:
-            page_id = "MenuSeparate"
-        elif button == self.sidebar.check_btn:
-            page_id = "MenuCheck"
-        elif button == self.sidebar.download_btn:
-            page_id = "MenuDownload"
+        if button == self.sidebar.tool_btn:
+            page_id = "MenuTool"
+        elif button == self.sidebar.community_btn:
+            page_id = "MenuCommunity"
+        elif button == self.sidebar.setting_btn:
+            page_id = "MenuSetting"
         else:
             return 
         

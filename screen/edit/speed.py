@@ -156,6 +156,6 @@ class SpeedPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("MenuEdit")
+            page_widget = main_window.page_mapping.get("MenuTool")
             if page_widget:
                 stack.setCurrentWidget(page_widget)

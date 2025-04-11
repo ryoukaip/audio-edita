@@ -17,17 +17,17 @@ class CustomSidebar(QWidget):
         sidebar.setContentsMargins(10, 10, 10, 10)
 
         # Create buttons
-        self.edit_btn = QPushButton(" edit")
-        self.edit_btn.setIcon(QIcon("./icon/edit.png"))
-        self.separate_btn = QPushButton(" separate")
-        self.separate_btn.setIcon(QIcon("./icon/trim.png"))
-        self.check_btn = QPushButton(" check")
-        self.check_btn.setIcon(QIcon("./icon/check.png"))
-        self.download_btn = QPushButton(" download")
-        self.download_btn.setIcon(QIcon("./icon/download.png"))
+        self.tool_btn = QPushButton(" tool")
+        self.tool_btn.setIcon(QIcon("./icon/tool.png"))
+        self.community_btn = QPushButton(" community")
+        self.community_btn.setIcon(QIcon("./icon/community.png"))
+        self.setting_btn = QPushButton(" setting")
+        self.setting_btn.setIcon(QIcon("./icon/setting.png"))
 
         # Style and setup buttons
-        for index, btn in enumerate([self.edit_btn, self.separate_btn, self.check_btn, self.download_btn]):
+        for index, btn in enumerate([self.tool_btn,
+                                     self.community_btn,
+                                     self.setting_btn,]):
             btn.setStyleSheet("""
                 QPushButton {
                     background-color: #1c1b1f;

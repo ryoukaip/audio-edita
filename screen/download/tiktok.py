@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt, QUrl, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QPixmap
 from screen.function.mainscreen.function_functionbar import FunctionBar
-from screen.download.function_downloadui import DownloadUI
+from screen.function.mainscreen.function_downloadbar import DownloadUI
 from screen.download.worker_download import DownloadWorker, URLValidator
 
 class TiktokDownloadPage(QWidget):
@@ -110,6 +110,6 @@ class TiktokDownloadPage(QWidget):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("MenuDownload")
+            page_widget = main_window.page_mapping.get("MenuTool")
             if page_widget:
                 stack.setCurrentWidget(page_widget)

@@ -182,14 +182,6 @@ class CheckOnlinePage(QWidget):
         # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
         self.audio_player.load_shared_audio()
 
-    def go_back(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            page_widget = main_window.page_mapping.get("MenuCheck")
-            if page_widget:
-                stack.setCurrentWidget(page_widget)
-
     def toggle_playback(self):
         # Placeholder
         pass
@@ -236,3 +228,11 @@ class CheckOnlinePage(QWidget):
         self.album_label.setText("???")
         self.year_label.setText("???")
         self.album_art_label.setPixmap(QPixmap())
+
+    def go_back(self):
+        main_window = self.window()
+        if main_window:
+            stack = main_window.stack
+            page_widget = main_window.page_mapping.get("MenuTool")
+            if page_widget:
+                stack.setCurrentWidget(page_widget)

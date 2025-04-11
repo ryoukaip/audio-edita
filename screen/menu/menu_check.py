@@ -46,7 +46,7 @@ class IconButton(QPushButton):
 
         self.setLayout(layout)
 
-class MenuSeparatePage(QWidget):
+class MenuCheckPage(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -58,21 +58,8 @@ class MenuSeparatePage(QWidget):
         self.setFont(QFont(font_family))
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 50, 12, 12)
+        layout.setContentsMargins(12, 0, 12, 12)
         layout.setSpacing(15)
-        
-        title = QLabel("audio separation")
-        title.setFont(QFont(font_family, 16))
-        title.setAlignment(Qt.AlignCenter)
-        subtitle = QLabel("choose a function to start")
-        subtitle.setFont(QFont(font_family, 12))
-        subtitle.setAlignment(Qt.AlignCenter)
-        
-        title_subtitle_layout = QVBoxLayout()
-        title_subtitle_layout.addWidget(title)
-        title_subtitle_layout.addWidget(subtitle)
-        title_subtitle_layout.setSpacing(2)
-        title_subtitle_layout.setAlignment(Qt.AlignCenter)
         
         # Grid Layout cho các nút
         container = QWidget()
@@ -81,47 +68,35 @@ class MenuSeparatePage(QWidget):
         grid.setSpacing(15)
 
         buttons = [
-            ("vocal", "./icon/micro.png"), ("video", "./icon/video.png"),
-            ("noise", "./icon/noise.png"),
+            ("online", "./icon/wifi.png"), ("offline", "./icon/wifi-none.png"),
         ]
         
         positions = [(i, j) for i in range(2) for j in range(5)]
         for pos, (text, icon_path) in zip(positions, buttons):
             btn = IconButton(icon_path, text)
-            if text == "vocal":
-                btn.clicked.connect(self.show_vocal_separation_page)
-            elif text == "video":
-                btn.clicked.connect(self.show_video_page)
-            elif text == "noise":
-                btn.clicked.connect(self.show_noise_page)
+            if text == "online":
+                btn.clicked.connect(self.show_online_page)
+            elif text == "offline":
+                btn.clicked.connect(self.show_offline_page)
             grid.addWidget(btn, *pos)
         
-        container.setFixedWidth(400)
+        container.setFixedWidth(300)
 
-        layout.addLayout(title_subtitle_layout)
         layout.addWidget(container, alignment=Qt.AlignCenter)
         layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
 
-    def show_vocal_separation_page(self):
+    def show_online_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("Separate")
+            page_widget = main_window.page_mapping.get("CheckOnline")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
 
-    def show_video_page(self):
+    def show_offline_page(self):
         main_window = self.window()
         if main_window:
             stack = main_window.stack
-            page_widget = main_window.page_mapping.get("Video2Audio")
-            if page_widget:
-                stack.setCurrentWidget(page_widget)
-
-    def show_noise_page(self):
-        main_window = self.window()
-        if main_window:
-            stack = main_window.stack
-            page_widget = main_window.page_mapping.get("Noise")
+            page_widget = main_window.page_mapping.get("CheckOffline")
             if page_widget:
                 stack.setCurrentWidget(page_widget)
