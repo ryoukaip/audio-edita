@@ -77,7 +77,7 @@ class AboutTab(QWidget):
         ]
         for sponsor in sponsors:
             sponsor_label = QLabel(sponsor)
-            sponsor_label.setFont(QFont(font_family, 11.5))
+            sponsor_label.setFont(QFont(font_family, 11))
             sponsor_label.setStyleSheet("color: white;")
             sponsor_label.setAlignment(Qt.AlignCenter)  # Căn giữa từng dòng
             right_layout.addWidget(sponsor_label)
