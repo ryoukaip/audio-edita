@@ -4,15 +4,24 @@ from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QPixmap
 from PyQt5.QtCore import Qt, QUrl, QTimer, QThread, pyqtSignal
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 from screen.edit.worker_reverse import ReverseWorker
+from screen.function.system.system_thememanager import ThemeManager
 
 class ReversePage(QWidget):
     def __init__(self, audio_data_manager):
         super().__init__()
         self.audio_data_manager = audio_data_manager 
         self.selected_audio_file = None
+
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_button_colors)
+        
         self.initUI()
     
     def initUI(self):
@@ -43,16 +52,7 @@ class ReversePage(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
 
@@ -61,16 +61,7 @@ class ReversePage(QWidget):
         self.export_btn = QPushButton("Export")
         self.export_btn.setFixedSize(100, 40)
         self.export_btn.setFont(QFont(font_family, 13))
-        self.export_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
         self.export_btn.clicked.connect(self.export_audio)
         button_layout.addWidget(self.export_btn)
 
@@ -80,6 +71,25 @@ class ReversePage(QWidget):
 
         # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
         self.audio_player.load_shared_audio()
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_button_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet()) 
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")

@@ -4,15 +4,24 @@ from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
 from PyQt5.QtCore import Qt, QTimer, QUrl
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 from screen.separate.worker_noise import NoiseWorker
+from screen.function.system.system_thememanager import ThemeManager
 
 class NoisePage(QWidget):
     def __init__(self, audio_data_manager):
         super().__init__()
         self.audio_data_manager = audio_data_manager
         self.selected_audio_file = None
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.initUI()
 
     def initUI(self):
@@ -83,12 +92,28 @@ class NoisePage(QWidget):
         btn = QPushButton(text)
         btn.setFixedSize(width, 40)
         btn.setFont(QFont(font_family, 13))
-        btn.setStyleSheet("""
-            QPushButton { background-color: #3a4062; border-radius: 12px; color: white; }
-            QPushButton:hover { background-color: #292d47; }
-        """)
+        btn.setStyleSheet(self.get_button_stylesheet())
         btn.clicked.connect(callback)
         return btn
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")

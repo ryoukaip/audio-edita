@@ -29,7 +29,6 @@ class MenuSettingPage(QWidget):
 
         # Tạo hệ thống tab từ hàm riêng
         tabs_container = SettingBar(self, font_family)
-        tabs_container.theme_changed.connect(self.theme_changed.emit)
         tabs_container.setMaximumWidth(600)
 
         # Thêm các thành phần vào layout chính

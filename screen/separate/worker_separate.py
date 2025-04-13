@@ -18,7 +18,7 @@ class SpleeterSeparator(QThread):
     def run(self):
         try:
             # Check ffmpeg installation with specific path
-            ffmpeg_path = os.path.join(os.path.expanduser("~"), "scoop", "shims", "ffmpeg.exe")
+            ffmpeg_path = os.path.join("./ffmpeg.exe")
             if not os.path.exists(ffmpeg_path):
                 self.error.emit(f"FFmpeg not found at {ffmpeg_path}")
                 return

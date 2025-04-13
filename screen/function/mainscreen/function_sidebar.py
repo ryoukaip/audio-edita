@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
+from screen.function.system.system_thememanager import ThemeManager
 
 class CustomSidebar(QWidget):
     buttonClicked = pyqtSignal(int, QPushButton)
@@ -9,11 +10,13 @@ class CustomSidebar(QWidget):
         super().__init__(parent)
         self.font_family = font_family
         self.current_button = None
-        self.current_theme = None
+        
+        # Sử dụng ThemeManager thay vì quản lý theme trực tiếp
+        self.theme_manager = ThemeManager()
+        self.theme_manager.theme_changed.connect(self.on_theme_changed)
         self.setupUI()
 
     def setupUI(self):
-        # Set solid background for the sidebar widget
         self.setStyleSheet("background-color: #1c1b1f;")
 
         sidebar = QVBoxLayout(self)
@@ -37,17 +40,14 @@ class CustomSidebar(QWidget):
 
         sidebar.addStretch()
 
-        self.set_theme({
-            "primary": "#98a4e6",
-            "secondary": "#7d8bd4",
-            "background": "#474f7a",
-            "highlight": "#6574c6",
-            "shadow": "#3a4062",
-            "dark": "#292d47"
-        })
+        # Áp dụng theme hiện tại từ ThemeManager
+        self.set_theme(self.theme_manager.get_theme_colors())
+
+    def on_theme_changed(self, colors):
+        """Được gọi khi theme thay đổi trong ThemeManager"""
+        self.set_theme(colors)
 
     def set_theme(self, colors):
-        self.current_theme = colors
         default_style = f"""
             QPushButton {{
                 background-color: #1c1b1f;
@@ -78,9 +78,13 @@ class CustomSidebar(QWidget):
                     text-align: left;
                 }}
             """)
+        
+        # Lấy theme hiện tại từ ThemeManager
+        current_theme = self.theme_manager.get_theme_colors()
+        
         active_style = f"""
             QPushButton {{
-                background-color: {self.current_theme['background']};
+                background-color: {current_theme['background']};
                 color: white;
                 font-size: 14px;
                 border: none;

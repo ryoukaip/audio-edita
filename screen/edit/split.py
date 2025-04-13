@@ -1,19 +1,27 @@
-# screen/edit/split.py
 import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
 from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal, QTimer
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 from screen.edit.worker_split import SplitWorker
+from screen.function.system.system_thememanager import ThemeManager
 
 class SplitPage(QWidget):
     def __init__(self, audio_data_manager):
         super().__init__()
-        self.audio_data_manager = audio_data_manager  # Thêm AudioDataManager
+        self.audio_data_manager = audio_data_manager
         self.selected_audio_file = None
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.initUI()
     
     def initUI(self):
@@ -44,14 +52,7 @@ class SplitPage(QWidget):
 
         self.time_label = QLabel("00:00")
         self.time_label.setFont(QFont(font_family, 13, QFont.Bold))
-        self.time_label.setStyleSheet("""
-            QLabel {
-                color: #ffffff;
-                background-color: #474f7a;
-                border-radius: 18px;
-                padding: 6px 10px;
-            }
-        """)
+        self.time_label.setStyleSheet(self.get_time_label_stylesheet())
         layout.addWidget(self.time_label, alignment=Qt.AlignCenter)
         
         layout.addStretch()
@@ -62,42 +63,55 @@ class SplitPage(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
 
         button_layout.addSpacing(10)
 
-        export_btn = QPushButton("Export")
-        export_btn.setFixedSize(100, 40)
-        export_btn.setFont(QFont(font_family, 13))
-        export_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
-        export_btn.clicked.connect(self.show_output_widget)
-        button_layout.addWidget(export_btn)
+        self.export_btn = QPushButton("Export")
+        self.export_btn.setFixedSize(100, 40)
+        self.export_btn.setFont(QFont(font_family, 13))
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.clicked.connect(self.show_output_widget)
+        button_layout.addWidget(self.export_btn)
 
         layout.addLayout(button_layout)
         self.setStyleSheet("background-color: #282a32;")
 
         # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
         self.audio_player.load_shared_audio()
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def get_time_label_stylesheet(self):
+        """Tạo stylesheet cho ô thời gian dựa trên theme hiện tại"""
+        return f"""
+            QLabel {{
+                color: white;
+                background-color: {self.current_colors['background']};
+                border-radius: 18px;
+                padding: 6px 10px;
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các nút và ô thời gian khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
+        self.time_label.setStyleSheet(self.get_time_label_stylesheet())
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")

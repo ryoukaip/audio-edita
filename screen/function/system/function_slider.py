@@ -2,23 +2,14 @@ import os
 from PyQt5.QtWidgets import QWidget, QSlider, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
+from screen.function.system.system_thememanager import ThemeManager
 
 class Slider(QWidget):
-    # Signal to notify when the slider value changes
-    value_changed = pyqtSignal(float)  # Sử dụng float để linh hoạt hơn
+    value_changed = pyqtSignal(float)  
     
     def __init__(self, font_family, mode="volume", min_value=0, max_value=200, default_value=100, 
                  unit="%", icon_path="./icon/volume.png"):
-        """
-        Args:
-            font_family (str): Font family to use for text.
-            mode (str): Purpose of the slider ('volume', 'speed', etc.).
-            min_value (int): Minimum value of the slider.
-            max_value (int): Maximum value of the slider.
-            default_value (int): Default starting value.
-            unit (str): Unit to display (e.g., '%', 'x').
-            icon_path (str): Path to the icon file.
-        """
+
         super().__init__()
         self.font_family = font_family
         self.mode = mode
@@ -27,6 +18,14 @@ class Slider(QWidget):
         self.default_value = default_value
         self.unit = unit
         self.icon_path = icon_path
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu thanh trượt
+        self.theme_manager.theme_changed.connect(self.update_slider_colors)
+        
         self.initUI()
     
     def initUI(self):
@@ -53,7 +52,7 @@ class Slider(QWidget):
         self.value_label = QLabel(f"{self.default_value}{self.unit}")
         self.value_label.setFont(QFont(self.font_family, 12))
         self.value_label.setStyleSheet("color: white;")
-        self.value_label.setFixedWidth(70)  # Tăng chiều rộng để phù hợp với các giá trị như "0.5x"
+        self.value_label.setFixedWidth(70)  
         self.value_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(self.value_label)
     
@@ -77,24 +76,29 @@ class Slider(QWidget):
         if value is None:
             value = self.slider.value()
             
-        self.slider.setStyleSheet("""
-            QSlider::groove:horizontal {
+        self.slider.setStyleSheet(f"""
+            QSlider::groove:horizontal {{
                 height: 16px;
-                background: #3a4062;
+                background: {self.current_colors['shadow']};
                 border-radius: 8px;
-            }
-            QSlider::handle:horizontal {
+            }}
+            QSlider::handle:horizontal {{
                 image: url(./icon/dot.png);
                 width: 60px;
                 height: 60px;
                 margin: -12px 0px;
-            }
-            QSlider::sub-page:horizontal {
-                background: #7d8bd4;
+            }}
+            QSlider::sub-page:horizontal {{
+                background: {self.current_colors['secondary']};
                 border-radius: 8px;
                 height: 10px;
-            }
+            }}
         """)
+    
+    def update_slider_colors(self, colors):
+        """Update slider colors when theme changes"""
+        self.current_colors = colors
+        self.apply_slider_style()
     
     def get_processed_value(self):
         """Return the processed value based on mode"""

@@ -3,20 +3,18 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from screen.setting.setting_about import AboutTab
 from screen.setting.setting_theme import ThemeTab
+from screen.function.system.system_thememanager import ThemeManager
 
 class SettingBar(QWidget):
-    theme_changed = pyqtSignal(dict)  
-
     def __init__(self, parent=None, font_family="Arial"):
         super().__init__(parent)
-        self.current_colors = {
-            "primary": "#98a4e6",
-            "secondary": "#7d8bd4",
-            "background": "#474f7a",
-            "highlight": "#6574c6",
-            "shadow": "#3a4062",
-            "dark": "#292d47"
-        }
+        
+        # Sử dụng ThemeManager thay vì tự quản lý colors
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager
+        self.theme_manager.theme_changed.connect(self.update_theme_colors)
         
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -83,9 +81,9 @@ class SettingBar(QWidget):
         self.general_page = self.create_placeholder_page("General Settings (Coming Soon)", font_family)
         self.content_stack.addWidget(self.general_page)
         
+        # Chỉ truyền font_family cho ThemeTab, không cần kết nối tín hiệu
         self.theme_page = ThemeTab(font_family)
         self.content_stack.addWidget(self.theme_page)
-        self.theme_page.theme_changed.connect(self.update_theme_colors)
         
         self.about_page = AboutTab(font_family)
         self.content_stack.addWidget(self.about_page)
@@ -118,16 +116,20 @@ class SettingBar(QWidget):
         self.update_indicator_position(index)
     
     def update_theme_colors(self, colors):
+        # Cập nhật màu sắc khi nhận tín hiệu từ ThemeManager
         self.current_colors = colors
         current_index = self.content_stack.currentIndex()
+        
+        # Cập nhật giao diện cho các nút
         for i, button in enumerate(self.buttons):
             button.setStyleSheet(
                 self.active_style_template.format(**self.current_colors) if i == current_index 
                 else self.default_style_template.format(**self.current_colors)
             )
+        
+        # Cập nhật chỉ báo và các phần tử khác
         self.indicator.setStyleSheet(f"background-color: {self.current_colors['primary']};")
         self.general_page.layout().itemAt(0).widget().setStyleSheet(f"color: {self.current_colors['primary']};")
-        self.theme_changed.emit(colors)  # Phát tín hiệu ra ngoài
     
     def eventFilter(self, obj, event):
         if obj in self.buttons and event.type() == event.Show and not self._initial_update_done:

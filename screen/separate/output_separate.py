@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QLabel, QSizePol
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase, QDesktopServices
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.system.function_scrollarea import CustomScrollArea
+from screen.function.system.system_thememanager import ThemeManager
 
 class OutputSeparateWidget(QWidget):
     def __init__(self, parent=None):
@@ -11,9 +12,20 @@ class OutputSeparateWidget(QWidget):
         self.output_path = None
         self.original_filename = None
         self.scroll_layout = None
+
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_button_colors)
+        
         self.setupUI()
 
     def setupUI(self):
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setStyleSheet("background: transparent;")
+
         # Main vertical layout
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
@@ -47,32 +59,14 @@ class OutputSeparateWidget(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #474f7a;
-            }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
 
         # Add Back button
         done_btn = QPushButton("Back")
         done_btn.setFixedSize(100, 40)
         done_btn.setFont(QFont(font_family, 13))
-        done_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #474f7a;
-            }
-        """)
+        done_btn.setStyleSheet(self.get_button_stylesheet())
         done_btn.clicked.connect(self.go_back)
 
         # Add buttons to layout in correct order
@@ -80,6 +74,25 @@ class OutputSeparateWidget(QWidget):
         button_layout.addSpacing(10)  
         button_layout.addWidget(done_btn)
         main_layout.addLayout(button_layout)
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_button_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
 
     def update_audio_files(self, output_path, original_filename):
         """Cập nhật widget với thông tin về đường dẫn output và file gốc"""

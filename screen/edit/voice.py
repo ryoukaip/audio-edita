@@ -5,8 +5,9 @@ from PyQt5.QtCore import Qt, QUrl, QTimer
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.edit.worker_voice import VoiceWorker
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
+from screen.function.system.system_thememanager import ThemeManager
 
 class VoicePage(QWidget):
     def __init__(self, audio_data_manager):
@@ -16,6 +17,14 @@ class VoicePage(QWidget):
         self.output_file = None
         self.is_exporting = False
         self.last_exported_config = None
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.initUI()
 
     def initUI(self):
@@ -41,7 +50,7 @@ class VoicePage(QWidget):
         # Thay ComboBox bằng 5 nút độc lập
         self.selected_voice_type = None 
         voice_buttons_layout = QHBoxLayout()
-        voice_buttons_layout.setAlignment(Qt.AlignCenter)  
+        voice_buttons_layout.setAlignment(Qt.AlignCenter)
 
         voice_types = ["Male", "Female", "Child", "Elderly", "Robot"]
         self.voice_buttons = {}
@@ -50,10 +59,7 @@ class VoicePage(QWidget):
             btn = QPushButton(voice_type)
             btn.setFixedSize(100, 40)
             btn.setFont(QFont(font_family, 13))
-            btn.setStyleSheet("""
-                QPushButton { background-color: #323754; border-radius: 12px; color: white; }
-                QPushButton:hover { background-color: #292d47; }
-            """)
+            btn.setStyleSheet(self.get_voice_button_stylesheet(selected=False))
             btn.clicked.connect(lambda checked, vt=voice_type: self.select_voice_type(vt))
             voice_buttons_layout.addWidget(btn)
             voice_buttons_layout.addSpacing(10)
@@ -70,10 +76,7 @@ class VoicePage(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton { background-color: #323754; border-radius: 12px; color: white; }
-            QPushButton:hover { background-color: #292d47; }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
 
@@ -82,16 +85,58 @@ class VoicePage(QWidget):
         self.export_btn = QPushButton("Export")
         self.export_btn.setFixedSize(100, 40)
         self.export_btn.setFont(QFont(font_family, 13))
-        self.export_btn.setStyleSheet("""
-            QPushButton { background-color: #323754; border-radius: 12px; color: white; }
-            QPushButton:hover { background-color: #292d47; }
-        """)
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
         self.export_btn.clicked.connect(self.start_export)
         button_layout.addWidget(self.export_btn)
         layout.addLayout(button_layout)
 
         self.setStyleSheet("background-color: #282a32;")
         self.audio_player.load_shared_audio()
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút chính dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def get_voice_button_stylesheet(self, selected=False):
+        """Tạo stylesheet cho các nút chọn giọng nói dựa trên trạng thái selected"""
+        if selected:
+            return f"""
+                QPushButton {{
+                    background-color: {self.current_colors['dark']};
+                    border-radius: 12px;
+                    color: white;
+                    font-weight: bold;
+                    border: 2px solid #FBFFE4;
+                }}
+            """
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
+        for vtype, btn in self.voice_buttons.items():
+            selected = (vtype == self.selected_voice_type)
+            btn.setStyleSheet(self.get_voice_button_stylesheet(selected=selected))
 
     def on_file_dropped(self, file_path):
         if file_path.lower().endswith(('.wav', '.mp3', '.flac')):
@@ -135,27 +180,7 @@ class VoicePage(QWidget):
     def select_voice_type(self, voice_type):
         self.selected_voice_type = voice_type
         for vtype, btn in self.voice_buttons.items():
-            if vtype == voice_type:
-                btn.setStyleSheet("""
-                    QPushButton { 
-                        background-color: #292d47; 
-                        border-radius: 12px; 
-                        color: white; 
-                        font-weight: bold; 
-                        border: 2px solid #FBFFE4; 
-                    }
-                """)
-            else:
-                btn.setStyleSheet("""
-                    QPushButton { 
-                        background-color: #323754; 
-                        border-radius: 12px; 
-                        color: white; 
-                    }
-                    QPushButton:hover { 
-                        background-color: #474f7a; 
-                    }
-                """)
+            btn.setStyleSheet(self.get_voice_button_stylesheet(selected=(vtype == voice_type)))
         
         print(f"Selected voice type: {voice_type}")
         # Reset cấu hình đã xuất cuối cùng khi chọn loại giọng khác

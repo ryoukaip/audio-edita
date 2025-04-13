@@ -4,7 +4,8 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtCore import Qt, QSize, QPoint
 
-from screen.function.system.function_datamanager import AudioDataManager
+from screen.function.system.system_datamanager import AudioDataManager
+from screen.function.system.system_thememanager import ThemeManager
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 
 from screen.menu.menu_tool import MenuToolPage
@@ -54,15 +55,11 @@ class AudioEditorUI(QMainWindow):
         self.is_maximized = False
         self.page_mapping = {}
         self.previous_widget = None
-        self.current_theme = {
-            "primary": "#98a4e6",
-            "secondary": "#7d8bd4",
-            "background": "#474f7a",  # Not used for main window
-            "highlight": "#6574c6",
-            "shadow": "#3a4062",
-            "dark": "#292d47"
-        }
+
+        self.theme_manager = ThemeManager()
         self.audio_data_manager = AudioDataManager()
+
+        self.theme_manager.theme_changed.connect(self.on_theme_changed)
         self.initUI()
 
     def initUI(self):
@@ -92,6 +89,12 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.buttonClicked.connect(self.handle_sidebar_button)
 
         self.stack = QStackedWidget()
+        self.stack.setStyleSheet(f"""
+            QStackedWidget {{
+                background-color: #282a32;
+                border-top-left-radius: 22px;
+            }}
+        """)
 
         self.add_page("MenuTool", MenuToolPage())
         self.add_page("MenuEdit", MenuEditPage())
@@ -139,8 +142,6 @@ class AudioEditorUI(QMainWindow):
         self.sidebar.set_active_button(self.sidebar.tool_btn)
         self.is_maximized = False
         self.stack.currentChanged.connect(self.on_screen_changed)
-
-        self.apply_theme()
 
     def add_page(self, page_id, page_widget):
         index = self.stack.addWidget(page_widget)
@@ -195,19 +196,19 @@ class AudioEditorUI(QMainWindow):
         self.previous_widget = current_widget
 
     def update_theme(self, colors):
-        self.current_theme = colors
-        self.apply_theme()
+        self.theme_manager.update_theme(colors)
+
+    def on_theme_changed(self, colors):
+        """Xử lý khi theme thay đổi"""
+        # Áp dụng theme cho sidebar
+        if hasattr(self.sidebar, 'set_theme'):
+            self.sidebar.set_theme(colors)
+            
+        # Áp dụng theme cho title bar
+        if hasattr(self.title_bar, 'set_theme'):
+            self.title_bar.set_theme(colors)
+            
+        # Áp dụng theme cho tất cả các trang
         for page_id, page_widget in self.page_mapping.items():
             if hasattr(page_widget, 'set_theme'):
                 page_widget.set_theme(colors)
-
-    def apply_theme(self):
-        self.stack.setStyleSheet(f"""
-            QStackedWidget {{
-                background-color: #282a32;
-                border-top-left-radius: 22px;
-            }}
-        """)
-        self.sidebar.set_theme(self.current_theme)
-        if hasattr(self.title_bar, 'set_theme'):
-            self.title_bar.set_theme(self.current_theme)

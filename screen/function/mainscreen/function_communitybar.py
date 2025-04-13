@@ -2,10 +2,18 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QTimer
 from screen.setting.setting_about import AboutTab
+from screen.function.system.system_thememanager import ThemeManager
 
 class CommunityBar(QWidget):
     def __init__(self, parent=None, font_family="Arial"):
         super().__init__(parent)
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager
+        self.theme_manager.theme_changed.connect(self.update_theme_colors)
         
         # Main layout
         self.main_layout = QVBoxLayout(self)
@@ -25,25 +33,25 @@ class CommunityBar(QWidget):
         ]
         
         # Button style templates
-        self.default_style = """
-            QPushButton {
+        self.default_style_template = """
+            QPushButton {{
                 background: transparent; 
                 color: white;
                 padding: 10px 15px;
                 border: none;
-            }
-            QPushButton:hover {
-                color: #98a4e6;
-            }
+            }}
+            QPushButton:hover {{
+                color: {primary};
+            }}
         """
         
-        self.active_style = """
-            QPushButton {
+        self.active_style_template = """
+            QPushButton {{
                 background: transparent; 
-                color: #98a4e6;
+                color: {primary};
                 padding: 10px 15px;
                 border: none;
-            }
+            }}
         """
         
         # Create buttons
@@ -51,7 +59,7 @@ class CommunityBar(QWidget):
         for config in button_configs:
             button = QPushButton(config["text"])
             button.setFont(QFont(font_family, 12))
-            button.setStyleSheet(self.default_style)
+            button.setStyleSheet(self.default_style_template.format(**self.current_colors))
             button.clicked.connect(lambda checked, idx=config["index"]: self.switch_page(idx))
             self.buttons.append(button)
             self.button_layout.addWidget(button)
@@ -61,7 +69,7 @@ class CommunityBar(QWidget):
         
         # Moving indicator
         self.indicator = QWidget(button_container)
-        self.indicator.setStyleSheet("background-color: #98a4e6;")
+        self.indicator.setStyleSheet(f"background-color: {self.current_colors['primary']};")
         self.indicator.setFixedHeight(2)
         self.indicator.setFixedWidth(80)
         
@@ -76,11 +84,11 @@ class CommunityBar(QWidget):
         self.buttons[0].installEventFilter(self)
     
     def setup_pages(self, font_family):
-        # General page
+        # Store page
         self.store_page = self.create_placeholder_page("Store (Coming Soon)", font_family)
         self.content_stack.addWidget(self.store_page)
         
-        # Theme page
+        # Installed page
         self.installed_page = self.create_placeholder_page("Installed (Coming Soon)", font_family)
         self.content_stack.addWidget(self.installed_page)
     
@@ -90,7 +98,7 @@ class CommunityBar(QWidget):
         layout.setAlignment(Qt.AlignCenter)
         label = QLabel(text)
         label.setFont(QFont(font_family, 12))
-        label.setStyleSheet("color: white;")
+        label.setStyleSheet(f"color: {self.current_colors['primary']};")
         layout.addWidget(label)
         return page
     
@@ -109,11 +117,31 @@ class CommunityBar(QWidget):
         
         # Update button styles
         for i, button in enumerate(self.buttons):
-            button.setStyleSheet(self.active_style if i == index else self.default_style)
+            button.setStyleSheet(
+                self.active_style_template.format(**self.current_colors) if i == index 
+                else self.default_style_template.format(**self.current_colors)
+            )
         
         # Move indicator
         self.update_indicator_position(index)
-
+    
+    def update_theme_colors(self, colors):
+        # Cập nhật màu sắc khi nhận tín hiệu từ ThemeManager
+        self.current_colors = colors
+        current_index = self.content_stack.currentIndex()
+        
+        # Cập nhật giao diện cho các nút
+        for i, button in enumerate(self.buttons):
+            button.setStyleSheet(
+                self.active_style_template.format(**self.current_colors) if i == current_index 
+                else self.default_style_template.format(**self.current_colors)
+            )
+        
+        # Cập nhật chỉ báo và các nhãn trong trang
+        self.indicator.setStyleSheet(f"background-color: {self.current_colors['primary']};")
+        self.store_page.layout().itemAt(0).widget().setStyleSheet(f"color: {self.current_colors['primary']};")
+        self.installed_page.layout().itemAt(0).widget().setStyleSheet(f"color: {self.current_colors['primary']};")
+    
     def eventFilter(self, obj, event):
         if obj in self.buttons and event.type() == event.Show and not self._initial_update_done:
             self.update_indicator_position(self.buttons.index(obj))

@@ -1,28 +1,24 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGridLayout, QSizePolicy
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 from PyQt5.QtCore import Qt
+from screen.function.system.system_thememanager import ThemeManager
 
 class IconButton(QPushButton):
     def __init__(self, icon_path, text, parent=None):
         super().__init__(parent)
         self.setFixedSize(110, 80)  # Đặt kích thước tối đa cố định
 
+        # Sử dụng ThemeManager để lấy màu nền
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        self.theme_manager.theme_changed.connect(self.update_button_colors)
+
         # Load font Cabin-Bold
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family, 11))  # Áp dụng font cho nút
 
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: #323754;
-                border-radius: 15px;
-                border: none;
-                padding: 5px;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.setStyleSheet(self.get_stylesheet())
 
         layout = QVBoxLayout(self)
         layout.setSpacing(5)
@@ -44,7 +40,23 @@ class IconButton(QPushButton):
         layout.addWidget(text_label)
 
         self.setLayout(layout)
-
+    
+    def get_stylesheet(self):
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['background']};
+                border-radius: 15px;
+                border: none;
+                padding: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+    
+    def update_button_colors(self, colors):
+        self.current_colors = colors
+        self.setStyleSheet(self.get_stylesheet())
 
 class MenuEditPage(QWidget):
     def __init__(self):
@@ -52,7 +64,7 @@ class MenuEditPage(QWidget):
         self.initUI()
     
     def initUI(self):
-        #Thêm font cho ứng dụng
+        # Thêm font cho ứng dụng
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.setFont(QFont(font_family))
@@ -102,8 +114,8 @@ class MenuEditPage(QWidget):
 
         container.setFixedWidth(650)
       
-        layout.addWidget(container, alignment=Qt.AlignCenter)  # Changed from addLayout to addWidget
-        layout.addStretch()  # Đẩy lưới nút lên khi mở rộng cửa sổ
+        layout.addWidget(container, alignment=Qt.AlignCenter)
+        layout.addStretch()
 
     def show_equalizer_page(self):
         main_window = self.window()

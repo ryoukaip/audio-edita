@@ -5,12 +5,21 @@ from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices, QIcon
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.mainscreen.function_downloadbar import DownloadUI
 from screen.download.worker_download import DownloadWorker, URLValidator  # Thêm URLValidator vào import
+from screen.function.system.system_thememanager import ThemeManager
 
 class BlueskyDownloadPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file = None
-        self.validator = URLValidator()  # Khởi tạo URLValidator
+        self.validator = URLValidator() 
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_button_colors)
+        
         self.initUI()
     
     def initUI(self):
@@ -41,12 +50,12 @@ class BlueskyDownloadPage(QWidget):
 
         copyright_notice1 = QLabel("• respect audio creator")
         copyright_notice1.setFont(QFont(font_family, 8)) 
-        copyright_notice1.setStyleSheet("color: #aaaaaa;") 
+        copyright_notice1.setStyleSheet("color: #aaaaaa; background-color: transparent;") 
         copyright_layout.addWidget(copyright_notice1)
 
         copyright_notice2 = QLabel("• do not use copyrighted content without permission")
         copyright_notice2.setFont(QFont(font_family, 8))  
-        copyright_notice2.setStyleSheet("color: #aaaaaa;")  
+        copyright_notice2.setStyleSheet("color: #aaaaaa; background-color: transparent;")  
         copyright_layout.addWidget(copyright_notice2)
 
         # Thêm layout dọc vào layout ngang
@@ -56,20 +65,30 @@ class BlueskyDownloadPage(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
 
         layout.addLayout(button_layout)
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_button_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
 
     def download_bluesky_audio(self):
         bluesky_link = self.download_ui.link_input.text()

@@ -8,27 +8,27 @@
         "dark": "#292d47"
     },
     "Theme 2": {
-        "primary": "#5fbaa4",
-        "secondary": "#50a893",
-        "background": "#439b86",
-        "highlight": "#377f6e",
-        "shadow": "#317262",
-        "dark": "#193b33"
+        "primary": "#7fcfbd",
+        "secondary": "#5fbaa4",
+        "background": "#3d8e7c",
+        "highlight": "#4ba48e",
+        "shadow": "#2d6a5f",
+        "dark": "#1e453c"
     },
     "Theme 3": {
-        "primary": "#11d7f9",
-        "secondary": "#059eb8",
-        "background": "#04899f",
-        "highlight": "#088395",
-        "shadow": "#047386",
-        "dark": "#035e6e"
+        "primary": "#5ad8f1",
+        "secondary": "#26c1df",
+        "background": "#0e8ea3",
+        "highlight": "#1aa5bd",
+        "shadow": "#0a7787",
+        "dark": "#08515c"
     },
     "Theme 4": {
-        "primary": "#f15a3a",
-        "secondary": "#f14c28",
-        "background": "#cf310f",
-        "highlight": "#b72b0d",
-        "shadow": "#9f260c",
-        "dark": "#88200a"
+        "primary": "#f7977e",
+        "secondary": "#e87a5e",
+        "background": "#c75d41",
+        "highlight": "#dd654a",
+        "shadow": "#a84835",
+        "dark": "#7b3527"
     }
 }

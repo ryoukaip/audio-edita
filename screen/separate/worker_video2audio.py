@@ -5,8 +5,8 @@ from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtCore import QThread, pyqtSignal
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 
 class VideoToAudioWorker(QThread):
     progress_updated = pyqtSignal(int, str, str)  # Signal cho tiến trình (progress, status, time_remaining)

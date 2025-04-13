@@ -2,8 +2,15 @@ from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize
 from PyQt5.QtWidgets import (QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QSlider, QStackedWidget, QSizePolicy)
 from PyQt5.QtGui import QFont, QFontDatabase, QIcon
 from screen.function.playaudio.function_wavevisual import WaveformWidget
+from screen.function.system.system_thememanager import ThemeManager
 
 def setupUI(drop_area_label):
+    # Khởi tạo ThemeManager
+    drop_area_label.theme_manager = ThemeManager()
+    
+    # Kết nối tín hiệu theme_changed để cập nhật màu
+    drop_area_label.theme_manager.theme_changed.connect(lambda colors: update_ui_colors(drop_area_label, colors))
+    
     # Create stacked widget
     drop_area_label.stacked_widget = QStackedWidget(drop_area_label)
     
@@ -19,13 +26,14 @@ def setupUI(drop_area_label):
 def setup_drop_area_ui(drop_area_label):
     # Drop area widget
     drop_widget = QWidget()
-    drop_widget.setStyleSheet("""
-        QWidget {
-            background-color: #7d8bd4;
+    drop_widget.setStyleSheet(f"""
+        QWidget {{
+            background-color: {drop_area_label.theme_manager.get_theme_colors()['secondary']};
             border: 3px solid #FBFFE4;
             border-radius: 25px;
-        }
+        }}
     """)
+    drop_area_label.drop_widget = drop_widget  # Lưu tham chiếu để cập nhật sau
     
     # Drop area label
     drop_label = QLabel("click to select file or drop a file here")
@@ -49,12 +57,13 @@ def setup_player_ui(drop_area_label):
     # Upper section (seekbar)
     upper_widget = QWidget()
     upper_widget.setFixedHeight(220)
-    upper_widget.setStyleSheet("""
-        QWidget {
-            background-color: #7d8bd4;
+    upper_widget.setStyleSheet(f"""
+        QWidget {{
+            background-color: {drop_area_label.theme_manager.get_theme_colors()['secondary']};
             border-radius: 25px;
-        }
+        }}
     """)
+    drop_area_label.upper_widget = upper_widget  # Lưu tham chiếu để cập nhật sau
     upper_layout = QVBoxLayout(upper_widget)
     upper_layout.setContentsMargins(0, 0, 0, 0)
     upper_layout.setAlignment(Qt.AlignTop)
@@ -70,32 +79,32 @@ def setup_player_ui(drop_area_label):
     # Create seekbar as background
     drop_area_label.seekbar = QSlider(Qt.Horizontal)
     drop_area_label.seekbar.setFixedHeight(190)
-    drop_area_label.seekbar.setStyleSheet("""
-        QSlider {
+    drop_area_label.seekbar.setStyleSheet(f"""
+        QSlider {{
             background: transparent;
             margin: 0px;
             padding: 0px;
             border-top: none;
-        }
-        QSlider::groove:horizontal {
+        }}
+        QSlider::groove:horizontal {{
             height: 190px;
-            background: #474f7a;
+            background: {drop_area_label.theme_manager.get_theme_colors()['background']};
             border-radius: 25px;
             margin: 0px;
-        }
-        QSlider::handle:horizontal {
+        }}
+        QSlider::handle:horizontal {{
             width: 20px;             
             height: 190px;
-            background: #transparent; 
+            background: transparent; 
             margin-left: -10px;
             margin-right: -10px
-        }
-        QSlider::sub-page:horizontal {
+        }}
+        QSlider::sub-page:horizontal {{
             height: 190px;
-            background: #98a4e6;
+            background: {drop_area_label.theme_manager.get_theme_colors()['primary']};
             border-radius: 25px;
             margin: 0px;
-        }
+        }}
     """)
     drop_area_label.seekbar.sliderMoved.connect(drop_area_label.seek_position)
     drop_area_label.seekbar.setEnabled(False)
@@ -130,11 +139,14 @@ def setup_player_ui(drop_area_label):
     lower_layout.setAlignment(Qt.AlignVCenter)
 
     # Create play button with icon
+    transparent_style = "QPushButton { background-color: transparent; border: none; }"
+
     drop_area_label.back_btn = QPushButton()
     drop_area_label.back_btn.setFixedSize(40, 30)
     drop_area_label.back_btn.setIconSize(QSize(25, 25))
     drop_area_label.back_btn.setIcon(QIcon("./icon/arrow-back.png"))
     drop_area_label.back_btn.clicked.connect(lambda: drop_area_label.seek_relative(-10000))
+    drop_area_label.back_btn.setStyleSheet(transparent_style)
 
     drop_area_label.play_btn = QPushButton()
     drop_area_label.play_btn.setFixedSize(30, 30)
@@ -142,12 +154,14 @@ def setup_player_ui(drop_area_label):
     drop_area_label.pause_icon = QIcon("./icon/pause.png")
     drop_area_label.play_btn.setIcon(drop_area_label.play_icon)
     drop_area_label.play_btn.clicked.connect(drop_area_label.toggle_playback)
+    drop_area_label.play_btn.setStyleSheet(transparent_style)
 
     drop_area_label.forward_btn = QPushButton()
     drop_area_label.forward_btn.setFixedSize(40, 30)
     drop_area_label.forward_btn.setIconSize(QSize(25, 25))
     drop_area_label.forward_btn.setIcon(QIcon("./icon/arrow-forward.png"))
     drop_area_label.forward_btn.clicked.connect(lambda: drop_area_label.seek_relative(10000))
+    drop_area_label.forward_btn.setStyleSheet(transparent_style)
 
     # Create time labels
     drop_area_label.current_time = QLabel("00:00")
@@ -172,3 +186,51 @@ def setup_player_ui(drop_area_label):
     player_layout.addWidget(lower_widget)
 
     drop_area_label.stacked_widget.addWidget(player_widget)
+
+def update_ui_colors(drop_area_label, colors):
+    """Cập nhật màu sắc giao diện khi theme thay đổi"""
+    # Cập nhật drop area
+    drop_area_label.drop_widget.setStyleSheet(f"""
+        QWidget {{
+            background-color: {colors['secondary']};
+            border: 3px solid #FBFFE4;
+            border-radius: 25px;
+        }}
+    """)
+    
+    # Cập nhật upper section
+    drop_area_label.upper_widget.setStyleSheet(f"""
+        QWidget {{
+            background-color: {colors['secondary']};
+            border-radius: 25px;
+        }}
+    """)
+    
+    # Cập nhật seekbar
+    drop_area_label.seekbar.setStyleSheet(f"""
+        QSlider {{
+            background: transparent;
+            margin: 0px;
+            padding: 0px;
+            border-top: none;
+        }}
+        QSlider::groove:horizontal {{
+            height: 190px;
+            background: {colors['background']};
+            border-radius: 25px;
+            margin: 0px;
+        }}
+        QSlider::handle:horizontal {{
+            width: 20px;             
+            height: 190px;
+            background: transparent; 
+            margin-left: -10px;
+            margin-right: -10px
+        }}
+        QSlider::sub-page:horizontal {{
+            height: 190px;
+            background: {colors['primary']};
+            border-radius: 25px;
+            margin: 0px;
+        }}
+    """)

@@ -70,10 +70,10 @@ class AboutTab(QWidget):
 
         # Danh sách nhà tài trợ
         sponsors = [
-            "xAI Corporation",
-            "Tech Innovators Inc.",
-            "Future Fund",
-            "Community Supporters"
+            "xyz Corporation",
+            "xyz Innovators Inc.",
+            "xyz Future Fund",
+            "abc Foundation",
         ]
         for sponsor in sponsors:
             sponsor_label = QLabel(sponsor)

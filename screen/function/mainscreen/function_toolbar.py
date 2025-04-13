@@ -1,10 +1,18 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QStackedWidget
 from PyQt5.QtGui import QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, QSize, QTimer
+from screen.function.system.system_thememanager import ThemeManager
 
 class ToolBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # Sử dụng ThemeManager để quản lý màu sắc cho indicator
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu indicator
+        self.theme_manager.theme_changed.connect(self.update_indicator_color)
 
         font_id = QFontDatabase.addApplicationFont("./fonts/Cabin-Bold.ttf")
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
@@ -73,7 +81,7 @@ class ToolBar(QWidget):
         
         # Thanh động
         self.indicator = QWidget(button_container)
-        self.indicator.setStyleSheet("background-color: #98a4e6;")
+        self.indicator.setStyleSheet(f"background-color: {self.current_colors['primary']};")
         self.indicator.setFixedHeight(2)
         self.indicator.setFixedWidth(40)
         self.indicator.hide()  # Ẩn trước để tránh hiển thị sai vị trí
@@ -121,6 +129,11 @@ class ToolBar(QWidget):
         self.indicator.setGeometry(indicator_x, pos_y, self.indicator.width(), 2)
         self.indicator.show()  # Hiển thị indicator sau khi đã tính toán vị trí đúng
         self.indicator.raise_()
+    
+    def update_indicator_color(self, colors):
+        # Cập nhật màu sắc của indicator khi nhận tín hiệu từ ThemeManager
+        self.current_colors = colors
+        self.indicator.setStyleSheet(f"background-color: {self.current_colors['primary']};")
     
     def switch_page(self, index):
         # Chuyển nội dung

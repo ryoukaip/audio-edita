@@ -6,15 +6,24 @@ from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
 from PyQt5.QtCore import Qt, QUrl, QTimer, QThread, pyqtSignal
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 from screen.edit.worker_convert import ConvertWorker
+from screen.function.system.system_thememanager import ThemeManager
 
 class ConvertPage(QWidget):
     def __init__(self, audio_data_manager):
         super().__init__()
         self.audio_data_manager = audio_data_manager 
         self.selected_audio_file = None
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.initUI()
 
     def initUI(self):
@@ -50,22 +59,7 @@ class ConvertPage(QWidget):
         self.format_combo = QComboBox()
         self.format_combo.addItems(["wav", "mp3", "flac", "ogg"])
         self.format_combo.setFont(QFont(font_family, 13, QFont.Bold))
-        self.format_combo.setStyleSheet("""
-            QComboBox {
-                color: #ffffff;
-                background-color: #474f7a;
-                border-radius: 18px;
-                padding: 6px 10px;
-            }
-            QComboBox::drop-down {
-                border: none;
-            }
-            QComboBox QAbstractItemView {
-                background-color: #474f7a;
-                color: #ffffff;
-                selection-background-color: #3a4062;
-            }
-        """)
+        self.format_combo.setStyleSheet(self.get_combobox_stylesheet())
         self.format_combo.setFixedWidth(120)
         layout.addWidget(self.format_combo, alignment=Qt.AlignCenter)
         layout.addSpacing(10)
@@ -79,16 +73,7 @@ class ConvertPage(QWidget):
         self.open_location_btn = QPushButton("Open file location")
         self.open_location_btn.setFixedSize(180, 40)
         self.open_location_btn.setFont(QFont(font_family, 13))
-        self.open_location_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
         self.open_location_btn.clicked.connect(self.open_file_location)
         button_layout.addWidget(self.open_location_btn)
 
@@ -97,16 +82,7 @@ class ConvertPage(QWidget):
         self.convert_btn = QPushButton("Export")
         self.convert_btn.setFixedSize(100, 40)
         self.convert_btn.setFont(QFont(font_family, 13))
-        self.convert_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.convert_btn.setStyleSheet(self.get_button_stylesheet())
         self.convert_btn.clicked.connect(self.convert_audio)
         button_layout.addWidget(self.convert_btn)
 
@@ -116,6 +92,45 @@ class ConvertPage(QWidget):
 
         # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
         self.audio_player.load_shared_audio()
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def get_combobox_stylesheet(self):
+        """Tạo stylesheet cho ô chọn định dạng dựa trên theme hiện tại"""
+        return f"""
+            QComboBox {{
+                color: white;
+                background-color: {self.current_colors['background']};
+                border-radius: 18px;
+                padding: 6px 10px;
+            }}
+            QComboBox::drop-down {{
+                border: none;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {self.current_colors['background']};
+                color: white;
+                selection-background-color: {self.current_colors['shadow']};
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các nút và ô chọn định dạng khi theme thay đổi"""
+        self.current_colors = colors
+        self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.convert_btn.setStyleSheet(self.get_button_stylesheet())
+        self.format_combo.setStyleSheet(self.get_combobox_stylesheet())
 
     def on_file_dropped(self, file_path):
         print(f"File dropped: {file_path}")

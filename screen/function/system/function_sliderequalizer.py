@@ -2,6 +2,7 @@ import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont, QPainter, QColor, QPen, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal, QRect
+from screen.function.system.system_thememanager import ThemeManager
 
 class CustomSlider(QWidget):
     value_changed = pyqtSignal(float)
@@ -13,7 +14,15 @@ class CustomSlider(QWidget):
         self.value = default_value
         self.icon_path = icon_path
         self.handle_pixmap = QPixmap(self.icon_path)
-        self.handle_pos = None  
+        self.handle_pos = None
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.setFixedHeight(150)
         self.setFixedWidth(60)
         self.setMouseTracking(True)
@@ -41,23 +50,22 @@ class CustomSlider(QWidget):
         # Vẽ rãnh (groove)
         groove_rect = QRect(22, 10, 16, self.height() - 20)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor("#3a4062"))
+        painter.setBrush(QColor(self.current_colors['shadow']))
         painter.drawRoundedRect(groove_rect, 8, 8)
         
         # Vẽ vùng màu từ trung tâm đến tay cầm (hình chữ nhật)
         mid_point = self.height() // 2
         if self.value > 0:
             color_rect = QRect(22, mid_point, 16, self.handle_pos - mid_point)
-            painter.setBrush(QColor("#7d8bd4"))
+            painter.setBrush(QColor(self.current_colors['secondary']))
             painter.drawRect(color_rect)
         elif self.value < 0:
             color_rect = QRect(22, self.handle_pos, 16, mid_point - self.handle_pos)
-            painter.setBrush(QColor("#7d8bd4"))
+            painter.setBrush(QColor(self.current_colors['secondary']))
             painter.drawRect(color_rect)
         
         # Vẽ tay cầm (handle) bằng dot.png
         handle_rect = QRect(10, self.handle_pos - 20, 40, 40)
-        # Use device pixel ratio for better rendering on high DPI displays
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
         painter.drawPixmap(handle_rect, self.handle_pixmap)
 
@@ -81,6 +89,11 @@ class CustomSlider(QWidget):
         self.value = self.pos_to_value(self.handle_pos)
         self.value_changed.emit(self.value)
         self.update()
+    
+    def update_colors(self, colors):
+        """Update colors when theme changes"""
+        self.current_colors = colors
+        self.update()  # Force a repaint to apply new colors
     
     def set_value(self, value):
         self.value = max(self.min_value, min(self.max_value, value))

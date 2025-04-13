@@ -1,4 +1,3 @@
-# screen/check/check_online.py
 import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QSizePolicy, QGridLayout
@@ -7,19 +6,29 @@ from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.function.system.function_marqueelabel import MarqueeLabel
 from screen.check.worker_shazam import ShazamApp
+from screen.function.system.system_thememanager import ThemeManager
 
 class RoundedPhotoLabel(QLabel):
-    def __init__(self):
+    def __init__(self, theme_manager):
         super().__init__()
+        self.theme_manager = theme_manager
         self.setFixedSize(200, 200)
         self.setAlignment(Qt.AlignCenter)
-        self.setStyleSheet("""
-            QLabel {
-                background-color: #3a4062;
-                border-radius: 18px;
-            }
-        """)
+        self.setStyleSheet(self.get_stylesheet())
         
+    def get_stylesheet(self):
+        """Tạo stylesheet cho nhãn ảnh bìa dựa trên theme hiện tại"""
+        return f"""
+            QLabel {{
+                background-color: {self.theme_manager.get_theme_colors()['shadow']};
+                border-radius: 18px;
+            }}
+        """
+
+    def update_colors(self):
+        """Cập nhật màu sắc khi theme thay đổi"""
+        self.setStyleSheet(self.get_stylesheet())
+
     def setPixmap(self, pixmap):
         if pixmap:
             radius = 18
@@ -28,7 +37,7 @@ class RoundedPhotoLabel(QLabel):
             
             painter = QPainter(target)
             painter.setRenderHint(QPainter.Antialiasing)
-            painter.setBrush(QBrush(QColor("#3a4062")))
+            painter.setBrush(QBrush(QColor(self.theme_manager.get_theme_colors()['shadow'])))
             painter.setPen(Qt.NoPen)
             
             # Vẽ nền hình tròn
@@ -51,9 +60,17 @@ class RoundedPhotoLabel(QLabel):
 class CheckOnlinePage(QWidget):
     def __init__(self, audio_data_manager):
         super().__init__()
-        self.audio_data_manager = audio_data_manager  # Gán audio_data_manager trước
-        self.shazam_app = ShazamApp()  # Khởi tạo ShazamApp
-        self.initUI()  # Gọi initUI sau khi đã gán audio_data_manager
+        self.audio_data_manager = audio_data_manager
+        self.shazam_app = ShazamApp()
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
+        self.initUI()
     
     def initUI(self):
         # Add font
@@ -75,26 +92,22 @@ class CheckOnlinePage(QWidget):
         results_layout = QHBoxLayout(self.results_widget)
         
         # Thay đổi QLabel thành RoundedPhotoLabel tùy chỉnh
-        self.album_art_label = RoundedPhotoLabel()
+        self.album_art_label = RoundedPhotoLabel(self.theme_manager)
         results_layout.addWidget(self.album_art_label)
         results_layout.addSpacing(10)
         
-        info_widget = QWidget()
-        info_widget.setFixedSize(400, 200)
-        info_widget.setStyleSheet("""
-            QWidget {
-                background-color: #323754;
-                border-radius: 18px;
-            }
-        """)
+        self.info_widget = QWidget()
+        self.info_widget.setFixedSize(400, 200)
+        self.info_widget.setStyleSheet(self.get_info_widget_stylesheet())
         
         # Sử dụng QGridLayout thay vì QVBoxLayout và các QHBoxLayout
-        info_layout = QGridLayout(info_widget)
+        info_layout = QGridLayout(self.info_widget)
         info_layout.setContentsMargins(25, 15, 15, 15)
         
         # Title row - Sử dụng MarqueeLabel thay vì QLabel
         self.title_label = MarqueeLabel("song title")
         self.title_label.setFont(QFont(font_family, 14, QFont.Bold))
+        self.title_label.setStyleSheet("color: white;")
         info_layout.addWidget(self.title_label, 0, 0, 1, 2)
         
         # Artist row - sử dụng grid để căn chỉnh chính xác
@@ -104,6 +117,7 @@ class CheckOnlinePage(QWidget):
         
         self.artist_label = MarqueeLabel("artist")
         self.artist_label.setFont(QFont(font_family, 12))
+        self.artist_label.setStyleSheet("color: white;")
         info_layout.addWidget(self.artist_label, 1, 1)
         
         # Album row
@@ -113,6 +127,7 @@ class CheckOnlinePage(QWidget):
         
         self.album_label = MarqueeLabel("album")
         self.album_label.setFont(QFont(font_family, 12))
+        self.album_label.setStyleSheet("color: white;")
         info_layout.addWidget(self.album_label, 2, 1)
         
         # Year row
@@ -122,6 +137,7 @@ class CheckOnlinePage(QWidget):
         
         self.year_label = MarqueeLabel("year")
         self.year_label.setFont(QFont(font_family, 12))
+        self.year_label.setStyleSheet("color: white;")
         info_layout.addWidget(self.year_label, 3, 1)
         
         # Đảm bảo cột 0 có kích thước cố định
@@ -133,7 +149,7 @@ class CheckOnlinePage(QWidget):
         # Thêm khoảng trống ở dưới
         info_layout.setRowStretch(4, 1)
         
-        results_layout.addWidget(info_widget)
+        results_layout.addWidget(self.info_widget)
         
         layout.addWidget(self.results_widget)
         layout.addSpacing(2)
@@ -162,16 +178,7 @@ class CheckOnlinePage(QWidget):
         self.analyze_button = QPushButton("Analyze")
         self.analyze_button.setFixedSize(100, 40)
         self.analyze_button.setFont(QFont(font_family, 13))
-        self.analyze_button.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.analyze_button.setStyleSheet(self.get_button_stylesheet())
         self.analyze_button.clicked.connect(self.start_recognition)
         button_layout.addWidget(self.analyze_button)
         
@@ -181,6 +188,35 @@ class CheckOnlinePage(QWidget):
         
         # Tải tệp âm thanh từ AudioDataManager khi khởi tạo
         self.audio_player.load_shared_audio()
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho nút Analyze dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def get_info_widget_stylesheet(self):
+        """Tạo stylesheet cho widget thông tin kết quả dựa trên theme hiện tại"""
+        return f"""
+            QWidget {{
+                background-color: {self.current_colors['dark']};
+                border-radius: 18px;
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các thành phần khi theme thay đổi"""
+        self.current_colors = colors
+        self.analyze_button.setStyleSheet(self.get_button_stylesheet())
+        self.album_art_label.update_colors()
+        self.info_widget.setStyleSheet(self.get_info_widget_stylesheet())
 
     def toggle_playback(self):
         # Placeholder

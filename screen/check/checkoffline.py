@@ -4,15 +4,24 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QPushButton, QHBo
 from PyQt5.QtGui import QFont, QFontDatabase, QDesktopServices
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
-from screen.function.system.function_renderwindow import RenderWindow
-from screen.function.system.function_notiwindow import NotiWindow
+from screen.function.system.system_renderwindow import RenderWindow
+from screen.function.system.system_notiwindow import NotiWindow
 from screen.check.worker_checkoffline import CheckOfflineWorker  # Đảm bảo import đúng worker
+from screen.function.system.system_thememanager import ThemeManager
 
 class CheckOfflinePage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_audio_file1 = None
         self.selected_audio_file2 = None
+
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_button_colors)
+        
         self.initUI()
 
     def initUI(self):
@@ -65,21 +74,30 @@ class CheckOfflinePage(QWidget):
         self.compare_btn = QPushButton("Analyze")
         self.compare_btn.setFixedSize(100, 40)
         self.compare_btn.setFont(QFont(font_family, 13))
-        self.compare_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        self.compare_btn.setStyleSheet(self.get_button_stylesheet())
         self.compare_btn.clicked.connect(self.compare_audio)
         button_layout.addWidget(self.compare_btn)
 
         layout.addLayout(button_layout)
         self.setStyleSheet("background-color: #282a32;")
+
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho các nút dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def update_button_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.compare_btn.setStyleSheet(self.get_button_stylesheet())
 
     def on_file1_dropped(self, file_path):
         print(f"File 1 dropped: {file_path}")

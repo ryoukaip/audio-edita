@@ -1,4 +1,3 @@
-# screen/separate/separate.py
 import os
 import sys
 import subprocess
@@ -8,8 +7,9 @@ from PyQt5.QtGui import QFont, QFontDatabase
 from screen.function.mainscreen.function_functionbar import FunctionBar
 from screen.function.playaudio.function_playaudio import DropAreaLabel
 from screen.separate.worker_separate import start_separation
-from screen.function.system.function_renderwindow import RenderWindow
+from screen.function.system.system_renderwindow import RenderWindow
 from screen.separate.output_separate import OutputSeparateWidget
+from screen.function.system.system_thememanager import ThemeManager
 
 class SeparatePage(QWidget):
     def __init__(self, audio_data_manager):
@@ -17,6 +17,14 @@ class SeparatePage(QWidget):
         self.audio_data_manager = audio_data_manager 
         self.selected_file = None
         self.selected_stems = 2  # Default value
+        
+        # Sử dụng ThemeManager để quản lý màu sắc
+        self.theme_manager = ThemeManager()
+        self.current_colors = self.theme_manager.get_theme_colors()
+        
+        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
+        self.theme_manager.theme_changed.connect(self.update_colors)
+        
         self.initUI()  
     
     def initUI(self):
@@ -56,29 +64,17 @@ class SeparatePage(QWidget):
         self.button_group.setExclusive(True)
         self.button_group.buttonClicked.connect(self.handle_stem_selection)
 
-        # Common button style
-        button_style = """
-            QPushButton {
-                background-color: #323754;
-                border-radius: 15px;
-                color: white;
-            }
-            QPushButton:checked {
-                background-color: #7d8bd4;
-            }
-        """
-
         # Left and right column options
-        self.create_column(columns_layout, "left", [("vocal + instrument", "2")], font_family, button_style)
-        self.create_column(columns_layout, "right", [("vocal + 3 instrument", "4")], font_family, button_style)
+        self.create_column(columns_layout, "left", [("vocal + instrument", "2")], font_family)
+        self.create_column(columns_layout, "right", [("vocal + 3 instrument", "4")], font_family)
 
         drop_columns_layout.addWidget(columns_container, 0, Qt.AlignCenter)
         drop_columns_layout.addStretch()
         main_layout.addWidget(drop_columns_container)
 
         # Export button
-        export_btn = self.create_export_button(font_family)
-        main_layout.addWidget(export_btn, 0, Qt.AlignRight | Qt.AlignBottom)
+        self.export_btn = self.create_export_button(font_family)
+        main_layout.addWidget(self.export_btn, 0, Qt.AlignRight | Qt.AlignBottom)
 
         # Set layout
         layout = QVBoxLayout(self)
@@ -90,7 +86,40 @@ class SeparatePage(QWidget):
         self.button_group.buttons()[0].setChecked(True)
         self.audio_player.load_shared_audio()
 
-    def create_column(self, parent_layout, side, options, font_family, button_style):
+    def get_button_stylesheet(self):
+        """Tạo stylesheet cho nút Export dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 12px;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: {self.current_colors['dark']};
+            }}
+        """
+
+    def get_stem_button_stylesheet(self):
+        """Tạo stylesheet cho các nút chọn số lượng stems dựa trên theme hiện tại"""
+        return f"""
+            QPushButton {{
+                background-color: {self.current_colors['shadow']};
+                border-radius: 15px;
+                color: white;
+            }}
+            QPushButton:checked {{
+                background-color: {self.current_colors['primary']};
+            }}
+        """
+
+    def update_colors(self, colors):
+        """Cập nhật màu sắc của các nút khi theme thay đổi"""
+        self.current_colors = colors
+        self.export_btn.setStyleSheet(self.get_button_stylesheet())
+        for btn in self.button_group.buttons():
+            btn.setStyleSheet(self.get_stem_button_stylesheet())
+
+    def create_column(self, parent_layout, side, options, font_family):
         """Helper method to create a column with options"""
         container = QWidget()
         column_layout = QVBoxLayout(container)
@@ -106,7 +135,7 @@ class SeparatePage(QWidget):
             btn.setFixedSize(54, 50)
             btn.setFont(QFont(font_family, 16))
             btn.setCheckable(True)
-            btn.setStyleSheet(button_style)
+            btn.setStyleSheet(self.get_stem_button_stylesheet())
             self.button_group.addButton(btn)
 
             label = QLabel(text)
@@ -125,16 +154,7 @@ class SeparatePage(QWidget):
         btn = QPushButton("Export")
         btn.setFixedSize(100, 40)
         btn.setFont(QFont(font_family, 13))
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a4062;
-                border-radius: 12px;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #292d47;
-            }
-        """)
+        btn.setStyleSheet(self.get_button_stylesheet())
         btn.clicked.connect(self.show_output_widget)
         return btn
 
