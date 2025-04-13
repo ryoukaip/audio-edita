@@ -88,7 +88,6 @@ class SoundcloudDownloadPage(QWidget):
         """Cập nhật màu sắc của các nút khi theme thay đổi"""
         self.current_colors = colors
         self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
-        self.export_btn.setStyleSheet(self.get_button_stylesheet())
 
     def download_soundcloud_audio(self):
         soundcloud_link = self.download_ui.link_input.text()

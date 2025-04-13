@@ -85,6 +85,10 @@ class SeparatePage(QWidget):
         # Default selection and load audio
         self.button_group.buttons()[0].setChecked(True)
         self.audio_player.load_shared_audio()
+        self.setStyleSheet("""
+            background-color: #282a32;
+            border-radius: 22px;
+        """)
 
     def get_button_stylesheet(self):
         """Tạo stylesheet cho nút Export dựa trên theme hiện tại"""

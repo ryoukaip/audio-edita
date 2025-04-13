@@ -92,7 +92,6 @@ class OutputSeparateWidget(QWidget):
         """Cập nhật màu sắc của các nút khi theme thay đổi"""
         self.current_colors = colors
         self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
-        self.export_btn.setStyleSheet(self.get_button_stylesheet())
 
     def update_audio_files(self, output_path, original_filename):
         """Cập nhật widget với thông tin về đường dẫn output và file gốc"""
