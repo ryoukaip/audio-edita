@@ -7,6 +7,7 @@ __pycache__/
 *.pyd
 *.dll
 *.exe
-
+build/
+dist/
 !fpcalc.exe
 temp_standardized_audio.mp3
