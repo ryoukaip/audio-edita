@@ -1,19 +1,10 @@
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
 from PyQt5.QtWidgets import QScrollArea
-from screen.function.system.system_thememanager import ThemeManager
 
 class CustomScrollArea(QScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._scroll_alpha = 0
-        
-        # Sử dụng ThemeManager để quản lý màu sắc
-        self.theme_manager = ThemeManager()
-        self.current_colors = self.theme_manager.get_theme_colors()
-        
-        # Kết nối tín hiệu từ ThemeManager để cập nhật màu
-        self.theme_manager.theme_changed.connect(self.update_scrollbar_colors)
-        
         self.fade_timer = QTimer(self)
         self.fade_timer.timeout.connect(self.hide_scrollbar)
         self.fade_timer.setSingleShot(True)
@@ -33,9 +24,9 @@ class CustomScrollArea(QScrollArea):
 
         # Add smooth scroll animation
         self.scroll_animation = QPropertyAnimation(self.verticalScrollBar(), b"value")
-        self.scroll_animation.setDuration(250)
-        self.scroll_animation.setEasingCurve(QEasingCurve.OutExpo)
-        self.scroll_step = 120
+        self.scroll_animation.setDuration(250)  # Giảm duration xuống
+        self.scroll_animation.setEasingCurve(QEasingCurve.OutExpo)  # Đổi curve
+        self.scroll_step = 120  # Thêm scroll step cố định
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
@@ -55,13 +46,13 @@ class CustomScrollArea(QScrollArea):
         style = f"""
             QScrollBar:vertical {{
                 border: none;
-                background: {self.current_colors['shadow'] + f', {alpha/255})'};
+                background: rgba(40, 42, 50, {alpha/255});
                 width: 12px;
                 margin: 15px 5px 15px 5px;
                 border-radius: 6px;
             }}
             QScrollBar::handle:vertical {{
-                background: {self.current_colors['secondary'] + f', {alpha/255})'};
+                background: rgba(255, 255, 255, {alpha/255});
                 min-height: 30px;
                 border-radius: 6px;
             }}
@@ -75,11 +66,6 @@ class CustomScrollArea(QScrollArea):
             }}
         """
         self.verticalScrollBar().setStyleSheet(style)
-
-    def update_scrollbar_colors(self, colors):
-        """Update scrollbar colors when theme changes"""
-        self.current_colors = colors
-        self.updateScrollBarStyle(self._scroll_alpha)
 
     def wheelEvent(self, event):
         # Cancel any ongoing scroll animation

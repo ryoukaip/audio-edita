@@ -63,16 +63,16 @@ class OutputSeparateWidget(QWidget):
         self.open_location_btn.clicked.connect(self.open_file_location)
 
         # Add Back button
-        done_btn = QPushButton("Back")
-        done_btn.setFixedSize(100, 40)
-        done_btn.setFont(QFont(font_family, 13))
-        done_btn.setStyleSheet(self.get_button_stylesheet())
-        done_btn.clicked.connect(self.go_back)
+        self.done_btn = QPushButton("Back")
+        self.done_btn.setFixedSize(100, 40)
+        self.done_btn.setFont(QFont(font_family, 13))
+        self.done_btn.setStyleSheet(self.get_button_stylesheet())
+        self.done_btn.clicked.connect(self.go_back)
 
         # Add buttons to layout in correct order
         button_layout.addWidget(self.open_location_btn)
         button_layout.addSpacing(10)  
-        button_layout.addWidget(done_btn)
+        button_layout.addWidget(self.done_btn)
         main_layout.addLayout(button_layout)
 
     def get_button_stylesheet(self):
@@ -92,6 +92,8 @@ class OutputSeparateWidget(QWidget):
         """Cập nhật màu sắc của các nút khi theme thay đổi"""
         self.current_colors = colors
         self.open_location_btn.setStyleSheet(self.get_button_stylesheet())
+        self.done_btn.setStyleSheet(self.get_button_stylesheet())
+        
 
     def update_audio_files(self, output_path, original_filename):
         """Cập nhật widget với thông tin về đường dẫn output và file gốc"""
